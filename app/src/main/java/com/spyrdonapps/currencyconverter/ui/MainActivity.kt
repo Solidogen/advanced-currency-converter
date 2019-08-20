@@ -5,15 +5,33 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.spyrdonapps.currencyconverter.R
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
+/*
+TODO
+    create conversion app kotlin + offline mode works + screen rotation
+    + ui perfect + small things + save recycler position on rotate
+    + lots of tests + country flags/emojis
+TODO
+*/
+
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
+
+    val viewModel: MainViewModel by lazy {
+        ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
+    }
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -21,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setupRecyclerView()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
+
+        // todo delete
+        viewModel.toString()
     }
 
     private fun setupRecyclerView() {
