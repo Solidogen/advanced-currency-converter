@@ -12,6 +12,8 @@ import kotlinx.android.synthetic.main.item_currency.view.*
 
 class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHolder>(DiffCallback) {
 
+    // TODO zawsze updatuja sie ratesy wszystkie poza tym na gorze (domyslnie euro, przy dotyku itemu ten item leci do gory i stoi)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
 
@@ -30,12 +32,13 @@ class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHol
     }
 
     object DiffCallback : DiffUtil.ItemCallback<CurrencyUiModel>() {
+
         override fun areItemsTheSame(oldItem: CurrencyUiModel, newItem: CurrencyUiModel): Boolean {
             return oldItem.isoCode == newItem.isoCode
         }
 
         override fun areContentsTheSame(oldItem: CurrencyUiModel, newItem: CurrencyUiModel): Boolean {
-            return oldItem == newItem
+            return oldItem.rateBasedOnEuro == newItem.rateBasedOnEuro
         }
     }
 }

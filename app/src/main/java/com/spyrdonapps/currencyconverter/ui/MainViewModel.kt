@@ -23,8 +23,6 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
     private val _currenciesLiveData: MutableLiveData<Result<List<CurrencyUiModel>>> = MutableLiveData()
     val currenciesLiveData: LiveData<Result<List<CurrencyUiModel>>> = _currenciesLiveData
 
-    // todo relay kotlin equivalent if needed? would be fun to implement
-
     init {
         loadData()
     }

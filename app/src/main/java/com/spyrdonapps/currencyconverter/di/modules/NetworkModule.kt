@@ -18,15 +18,15 @@ abstract class NetworkModule {
         @JvmStatic
         fun provideApiService(): CurrencyService = Network.currencyService
     }
-}
 
-private object Network {
+    private object Network {
 
-    private const val API_URL = "https://revolut.duckdns.org/"
+        private const val API_URL = "https://revolut.duckdns.org/"
 
-    private val retrofit = Retrofit.Builder().baseUrl(API_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+        private val retrofit = Retrofit.Builder().baseUrl(API_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-    val currencyService: CurrencyService = retrofit.create(CurrencyService::class.java)
+        val currencyService: CurrencyService = retrofit.create(CurrencyService::class.java)
+    }
 }

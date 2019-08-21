@@ -64,6 +64,7 @@ TODO
             hasFixedSize()
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
+            itemAnimator = null
         }
     }
 
