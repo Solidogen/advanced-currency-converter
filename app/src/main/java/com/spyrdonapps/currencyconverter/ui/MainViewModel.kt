@@ -13,6 +13,8 @@ import kotlinx.coroutines.channels.consumeEach
 import timber.log.Timber
 import javax.inject.Inject
 
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
 class MainViewModel @Inject constructor(private val currencyService: CurrencyService) : ViewModel() {
 
     private val job = SupervisorJob()
@@ -23,15 +25,12 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
 
     // todo relay kotlin equivalent if needed? would be fun to implement
 
-    // TODO change this back
-//    init {
-//        loadData()
-//    }
+    init {
+        loadData()
+    }
 
     // TODO inject schedulers for testing
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
-    fun loadData() {
+    private fun loadData() {
         _currenciesLiveData.postValue(Result.Loading)
 
         scope.launch(Dispatchers.IO) {

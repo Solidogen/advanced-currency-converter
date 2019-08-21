@@ -43,9 +43,6 @@ TODO
         setupRecyclerView()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
         observeViewModel()
-
-        // todo remove
-        viewModel.loadData()
     }
 
     private fun observeViewModel() {
@@ -100,6 +97,7 @@ TODO
     private fun restoreRecyclerPositionIfNeeded() {
         layoutManagerInstanceState?.let {
             recyclerView.layoutManager?.onRestoreInstanceState(it)
+            layoutManagerInstanceState = null
         }
     }
 
