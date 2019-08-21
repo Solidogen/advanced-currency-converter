@@ -8,14 +8,18 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
 /*
@@ -25,6 +29,12 @@ TODO
     + lots of tests + country flags/emojis
 TODO
 */
+
+    // todo share scope with adapter to make some hacks for click handlers if index out of bounds
+    // OR ditch this shitty ListAdapter but make sure everything still works
+    
+//    private val job = SupervisorJob()
+//    private val scope = CoroutineScope(job + Dispatchers.Main)
 
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
@@ -65,7 +75,9 @@ TODO
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
             // todo probably will need something to animate selected item moving to the top
-            itemAnimator = null
+            itemAnimator = DefaultItemAnimator()/*.apply {
+                supportsChangeAnimations = false
+            }*/
         }
     }
 
@@ -78,8 +90,6 @@ TODO
     private fun showList(list: List<CurrencyUiModel>) {
         progressBar.isVisible = false
         currenciesAdapter.setData(list)
-
-        // todo probably will need submit list listener because diff is on bg thread, check for list adapter callbacks or recycler listeners
         restoreRecyclerPositionIfNeeded()
     }
 
