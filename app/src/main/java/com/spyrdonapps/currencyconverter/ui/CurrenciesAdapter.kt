@@ -8,11 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import kotlinx.android.synthetic.main.item_currency.view.*
-import java.util.*
+import java.util.Collections
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
-    private var canUpdateList = true
     private lateinit var recyclerView: RecyclerView
     private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
 
@@ -39,9 +38,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     }
 
     fun setData(list: List<CurrencyUiModel>) {
-        if (!canUpdateList) {
-            return
-        }
         items = Collections.synchronizedList(list)
         with(items) {
             val previousTopItem = first { it.isoCode == currentTopCurrencyIsoCode }
@@ -78,11 +74,9 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         }
 
         private fun onItemClicked(item: CurrencyUiModel) {
-            canUpdateList = false
             currentTopCurrencyIsoCode = item.isoCode
             moveItemToTopAndNotify(item)
             scrollToTop()
-            canUpdateList = true
         }
     }
 

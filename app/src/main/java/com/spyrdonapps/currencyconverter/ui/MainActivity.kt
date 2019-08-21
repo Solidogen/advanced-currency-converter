@@ -1,9 +1,9 @@
 package com.spyrdonapps.currencyconverter.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,7 +15,8 @@ import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
 @ObsoleteCoroutinesApi
@@ -24,17 +25,15 @@ class MainActivity : AppCompatActivity() {
 
 /*
 TODO
-    create conversion app kotlin + offline mode works + screen rotation
-    + ui perfect + small things + save recycler position on rotate
-    + lots of tests + country flags/emojis
+    create conversion app kotlin:
+    screen rotation OK
+    save recycler position on rotate OK
+    country flags/emojis
+    offline mode works
+    ui perfect
+    lots of tests
 TODO
 */
-
-    // todo share scope with adapter to make some hacks for click handlers if index out of bounds
-    // OR ditch this shitty ListAdapter but make sure everything still works
-
-//    private val job = SupervisorJob()
-//    private val scope = CoroutineScope(job + Dispatchers.Main)
 
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
@@ -82,9 +81,10 @@ TODO
     }
 
     private fun handleSavedInstanceStateIfNeeded(savedInstanceState: Bundle?) {
-        savedInstanceState?.getParcelable<Parcelable>(LAYOUT_MANAGER_INSTANCE_STATE_TAG)?.let { state: Parcelable ->
-            layoutManagerInstanceState = state
-        }
+        savedInstanceState?.getParcelable<Parcelable>(LAYOUT_MANAGER_INSTANCE_STATE_TAG)
+            ?.let { state: Parcelable ->
+                layoutManagerInstanceState = state
+            }
     }
 
     private fun showList(list: List<CurrencyUiModel>) {
@@ -115,7 +115,10 @@ TODO
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        outState?.putParcelable(LAYOUT_MANAGER_INSTANCE_STATE_TAG, recyclerView.layoutManager?.onSaveInstanceState())
+        outState?.putParcelable(
+            LAYOUT_MANAGER_INSTANCE_STATE_TAG,
+            recyclerView.layoutManager?.onSaveInstanceState()
+        )
     }
 
     companion object {

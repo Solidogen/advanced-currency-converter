@@ -8,19 +8,27 @@ import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
 import com.spyrdonapps.currencyconverter.util.extensions.interval
 import com.spyrdonapps.currencyconverter.util.state.Result
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class MainViewModel @Inject constructor(private val currencyService: CurrencyService) : ViewModel() {
+class MainViewModel @Inject constructor(private val currencyService: CurrencyService) :
+    ViewModel() {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Main)
 
-    private val _currenciesLiveData: MutableLiveData<Result<List<CurrencyUiModel>>> = MutableLiveData()
+    private val _currenciesLiveData: MutableLiveData<Result<List<CurrencyUiModel>>> =
+        MutableLiveData()
     val currenciesLiveData: LiveData<Result<List<CurrencyUiModel>>> = _currenciesLiveData
 
     init {
