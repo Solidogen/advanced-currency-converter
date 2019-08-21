@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.spyrdonapps.currencyconverter.R
-import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
+import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.util.GlideApp
 import kotlinx.android.synthetic.main.item_currency.view.*
 import timber.log.Timber
@@ -22,7 +22,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
     private var canUpdateList = true
 
-    private var items: MutableList<CurrencyUiModel> = mutableListOf()
+    private var items: MutableList<Currency> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context)
@@ -39,20 +39,23 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         recyclerView = recycler
     }
 
-    fun setData(list: List<CurrencyUiModel>) {
+    fun setData(list: List<Currency>) {
         if (!canUpdateList) {
             return
         }
         items = Collections.synchronizedList(list)
         with(items) {
-            val previousTopItem = first { it.isoCode == currentTopCurrencyIsoCode }
+            val previousTopItem = firstOrNull { it.isoCode == currentTopCurrencyIsoCode } ?: run {
+                Timber.e("List is empty")
+                return
+            }
             remove(previousTopItem)
             add(0, previousTopItem)
             notifyDataSetChanged()
         }
     }
 
-    private fun moveItemToTopAndNotify(item: CurrencyUiModel) {
+    private fun moveItemToTopAndNotify(item: Currency) {
         items.apply {
             recyclerView.post {
                 canUpdateList = false
@@ -78,7 +81,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
-        fun bind(item: CurrencyUiModel) {
+        fun bind(item: Currency) {
             with(view) {
                 isoCodeTextView.text = item.isoCode
                 fullNameTextView.text = item.fullName
@@ -111,7 +114,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             }
         }
 
-        private fun onItemClicked(item: CurrencyUiModel, rateEditText: EditText) {
+        private fun onItemClicked(item: Currency, rateEditText: EditText) {
             currentTopCurrencyIsoCode = item.isoCode
             moveItemToTopAndNotify(item)
             rateEditText.run {

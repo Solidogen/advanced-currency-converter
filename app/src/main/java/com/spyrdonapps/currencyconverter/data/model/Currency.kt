@@ -1,16 +1,27 @@
 package com.spyrdonapps.currencyconverter.data.model
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.spyrdonapps.currencyconverter.ui.CurrenciesAdapter
 import java.util.Locale
 
-data class CurrencyUiModel(
+@Entity(tableName = "currencies")
+data class Currency(
+
+    @PrimaryKey
+    @ColumnInfo(name = "iso_code")
     val isoCode: String,
+
+    @ColumnInfo(name = "rate_based_on_euro")
     val rateBasedOnEuro: Double
 ) {
+    @Ignore
     val flagImageUrl = "https://fxtop.com/ico/${isoCode.toLowerCase(Locale.ROOT)}.gif"
+
+    @Ignore
     val fullName = getCurrencyFullNameByIsoCode(isoCode)
-    // TODO think how this should be implemented coming from DB and how I will choose what to insert into glide
-    val cachedFlag: String? = null
 
     companion object {
 

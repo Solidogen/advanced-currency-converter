@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.spyrdonapps.currencyconverter.R
-import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
+import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
@@ -58,7 +58,7 @@ TODO
         })
     }
 
-    private fun handleCurrenciesState(result: Result<List<CurrencyUiModel>>) {
+    private fun handleCurrenciesState(result: Result<List<Currency>>) {
         when (result) {
             is Result.Success -> showList(result.data)
             Result.Loading -> showLoading()
@@ -81,7 +81,7 @@ TODO
             }
     }
 
-    private fun showList(list: List<CurrencyUiModel>) {
+    private fun showList(list: List<Currency>) {
         progressBar.isVisible = false
         currenciesAdapter.setData(list)
         restoreRecyclerPositionIfNeeded()
@@ -103,8 +103,6 @@ TODO
             .setMessage("")
             .setPositiveButton("OK", null)
             .show()
-
-        viewModel.loadDataFromCache()
     }
 
     private fun restoreRecyclerPositionIfNeeded() {

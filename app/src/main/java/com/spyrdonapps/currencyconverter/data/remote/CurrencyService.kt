@@ -5,5 +5,5 @@ import retrofit2.http.GET
 interface CurrencyService {
 
     @GET("latest?base=EUR")
-    suspend fun getCurrencies(): CurrenciesResponse
+    suspend fun getCurrenciesResponse(): CurrenciesResponse
 }
