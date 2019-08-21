@@ -22,16 +22,10 @@ class MainActivity : AppCompatActivity() {
 /*
 TODO
     create conversion app kotlin:
-    screen rotation OK
-    save recycler position on rotate OK
-    country flags/emojis
-    offline mode works (cache bitmaps from imageviews to bytearray -> string)
-    https://stackoverflow.com/questions/44761720/save-pictures-in-device-glide-library
+    fix sorting lags
     ui perfect
     lots of tests
-TODO
 */
-
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
     private var wasNetworkErrorShown = false
