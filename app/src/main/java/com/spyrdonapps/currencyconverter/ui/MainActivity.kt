@@ -40,8 +40,8 @@ TODO
         setupRecyclerView()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
 
-        // todo delete
-        viewModel.toString()
+        // todo remove
+        viewModel.loadData()
     }
 
     private fun setupRecyclerView() {

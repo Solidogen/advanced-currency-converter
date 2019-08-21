@@ -1,6 +1,6 @@
 package com.spyrdonapps.currencyconverter.di.modules
 
-import com.spyrdonapps.currencyconverter.data.remote.ApiService
+import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
 import com.spyrdonapps.currencyconverter.di.scopes.ApplicationScope
 import dagger.Module
 import dagger.Provides
@@ -16,7 +16,7 @@ abstract class NetworkModule {
         @ApplicationScope
         @Provides
         @JvmStatic
-        fun provideApiService(): ApiService = Network.apiService
+        fun provideApiService(): CurrencyService = Network.currencyService
     }
 }
 
@@ -28,5 +28,5 @@ private object Network {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val apiService : ApiService = retrofit.create(ApiService::class.java)
+    val currencyService: CurrencyService = retrofit.create(CurrencyService::class.java)
 }
