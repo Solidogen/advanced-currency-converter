@@ -3,12 +3,12 @@ package com.spyrdonapps.currencyconverter.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import kotlinx.android.synthetic.main.item_currency.view.*
-import java.util.Collections
+import java.util.*
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
@@ -19,7 +19,13 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private var items: MutableList<CurrencyUiModel> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
+        ViewHolder(
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.item_currency,
+                parent,
+                false
+            )
+        )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(items[position])
@@ -49,23 +55,14 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         items.apply {
             val selectedItemIndex = indexOf(item)
             Collections.swap(this, selectedItemIndex, 0)
-            val previousTopItem = items[selectedItemIndex]
-            val newTopItem = items[0]
-            notifyItemChanged(selectedItemIndex, newTopItem)
-            notifyItemChanged(0, previousTopItem)
-            // sort items besides top one
+            notifyItemMoved(selectedItemIndex, 0)
+            // sort items besides first one
             subList(1, lastIndex).sortBy { it.isoCode }
         }
     }
 
     private fun scrollToTop() {
-        recyclerView.layoutManager?.startSmoothScroll(object : LinearSmoothScroller(recyclerView.context) {
-            override fun getVerticalSnapPreference(): Int {
-                return SNAP_TO_START
-            }
-        }.apply {
-            targetPosition = 0
-        })
+        (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 1)
     }
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
@@ -79,6 +76,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                 }
             }
         }
+
         private fun onItemClicked(item: CurrencyUiModel) {
             canUpdateList = false
             currentTopCurrencyIsoCode = item.isoCode
