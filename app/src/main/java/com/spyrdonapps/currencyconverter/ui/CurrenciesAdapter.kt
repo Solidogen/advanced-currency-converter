@@ -25,8 +25,10 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private var items: MutableList<Currency> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_currency, parent, false))
+        ViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_currency, parent, false)
+        )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(items[position])
@@ -61,6 +63,11 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                 canUpdateList = false
                 try {
                     val selectedItemIndex = indexOf(item)
+                    /*
+                     *TODO
+                     * this swap is not good enough - it causes upcoming sortBy to lag the screen
+                     * item has to go directly to it's new sorted position, I need to calculate it right here, to spare sorting
+                     */
                     Collections.swap(this, selectedItemIndex, 0)
                     notifyItemMoved(selectedItemIndex, 0)
                     // sort items besides first one
@@ -91,10 +98,10 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
                 /*if (item.isoCode != currentTopCurrencyIsoCode) {
                     */rateEditText.run {
-                        setText(item.rateBasedOnEuro.toString())
-                        isFocusable = false
-                        isClickable = false
-                    }
+                setText(item.rateBasedOnEuro.toString())
+                isFocusable = false
+                isClickable = false
+            }
 //                }
 
                 GlideApp.with(view)
