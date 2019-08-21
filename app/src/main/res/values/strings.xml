@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Rates</string>
     <string name="error">Error loading data</string>
+    <string name="network_error">No internet, showing last available rates</string>
 </resources>

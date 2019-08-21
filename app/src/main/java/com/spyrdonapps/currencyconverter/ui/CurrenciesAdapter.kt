@@ -8,6 +8,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.util.GlideApp
@@ -95,6 +96,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
                 GlideApp.with(view)
                     .load(item.flagImageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .circleCrop()
                     .into(flagImageView)
 

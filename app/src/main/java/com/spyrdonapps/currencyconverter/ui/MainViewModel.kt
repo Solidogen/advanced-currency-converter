@@ -17,14 +17,12 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(private val currencyService: CurrencyService) :
-    ViewModel() {
+class MainViewModel @Inject constructor(private val currencyService: CurrencyService) : ViewModel() {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Main)
 
-    private val _currenciesLiveData: MutableLiveData<Result<List<CurrencyUiModel>>> =
-        MutableLiveData()
+    private val _currenciesLiveData: MutableLiveData<Result<List<CurrencyUiModel>>> = MutableLiveData()
     val currenciesLiveData: LiveData<Result<List<CurrencyUiModel>>> = _currenciesLiveData
 
     init {
@@ -55,6 +53,10 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
             Timber.e(e)
             _currenciesLiveData.postValue(Result.Error(e))
         }
+    }
+
+    fun loadDataFromCache() {
+
     }
 
     override fun onCleared() {

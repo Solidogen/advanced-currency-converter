@@ -8,13 +8,13 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.IOException
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
@@ -34,6 +34,7 @@ TODO
 
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
+    private var wasNetworkErrorShown = false
 
     private val viewModel: MainViewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
@@ -61,7 +62,7 @@ TODO
         when (result) {
             is Result.Success -> showList(result.data)
             Result.Loading -> showLoading()
-            is Result.Error -> showError()
+            is Result.Error -> showError(result.exception)
         }
     }
 
@@ -90,13 +91,20 @@ TODO
         progressBar.isVisible = true
     }
 
-    private fun showError() {
+    private fun showError(exception: Exception) {
+        if (wasNetworkErrorShown) {
+            return
+        }
         progressBar.isVisible = false
+        wasNetworkErrorShown = true
+
         AlertDialog.Builder(this)
-            .setTitle(R.string.error)
+            .setTitle(if (exception is IOException) R.string.network_error else R.string.error)
             .setMessage("")
             .setPositiveButton("OK", null)
             .show()
+
+        viewModel.loadDataFromCache()
     }
 
     private fun restoreRecyclerPositionIfNeeded() {
