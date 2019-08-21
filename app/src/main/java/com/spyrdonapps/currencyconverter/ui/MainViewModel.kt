@@ -44,7 +44,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
             withContext(Dispatchers.IO) {
                 currencyRepository.getCurrencies()
             }.let { currencies ->
-                // todo cache in room db
+                currencyRepository.saveCurrencies(currencies)
                 _currenciesLiveData.postValue(Result.Success(currencies))
             }
         } catch (e: Exception) {
