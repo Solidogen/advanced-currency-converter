@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Currency Converter</string>
+    <string name="app_name">Rates</string>
     <string name="error">Error loading data</string>
 </resources>

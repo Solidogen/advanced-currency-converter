@@ -9,12 +9,13 @@ import kotlin.reflect.full.memberProperties
 * Custom deserialization in interceptor would be much better,
 * but decided to have fun with reflection anyway
 * */
-fun CurrenciesResponse.toUiModel(): List<CurrencyUiModel> =
+fun CurrenciesResponse.toUiModelList(): List<CurrencyUiModel> =
     rates::class.memberProperties
         .map {
             CurrencyUiModel(
                 isoCode = it.name,
-                rateBasedOnEuro = it.getter.call(rates) as Double
+                rateBasedOnEuro = it.getter.call(rates) as Double,
+                fullName = ""
             )
         }
         .toMutableList()
@@ -25,5 +26,6 @@ fun CurrenciesResponse.toUiModel(): List<CurrencyUiModel> =
 
 val euroCurrencyModel = CurrencyUiModel(
     isoCode = CurrenciesAdapter.EURO_ISO_CODE,
-    rateBasedOnEuro = 1.0
+    rateBasedOnEuro = 1.0,
+    fullName = ""
 )

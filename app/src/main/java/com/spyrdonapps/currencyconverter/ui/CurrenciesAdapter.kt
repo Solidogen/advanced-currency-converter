@@ -7,7 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
+import com.spyrdonapps.currencyconverter.util.GlideApp
 import kotlinx.android.synthetic.main.item_currency.view.*
+import timber.log.Timber
+import java.lang.Exception
 import java.util.Collections
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
@@ -66,17 +69,30 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         fun bind(item: CurrencyUiModel) {
             with(view) {
                 isoCodeTextView.text = item.isoCode
-                rateTextView.text = item.rateBasedOnEuro.toString()
+                fullNameTextView.text
+                rateEditText.setText(item.rateBasedOnEuro.toString())
                 setOnClickListener {
                     onItemClicked(item)
+                }
+                GlideApp.with(view)
+                    .load(item.flagImageUrl)
+                    .circleCrop()
+                    .into(flagImageView)
+                rateEditText.setOnTouchListener { _, _ ->
+                    view.performClick()
+                    false
                 }
             }
         }
 
         private fun onItemClicked(item: CurrencyUiModel) {
-            currentTopCurrencyIsoCode = item.isoCode
-            moveItemToTopAndNotify(item)
-            scrollToTop()
+            try {
+                currentTopCurrencyIsoCode = item.isoCode
+                moveItemToTopAndNotify(item)
+                scrollToTop()
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
         }
     }
 

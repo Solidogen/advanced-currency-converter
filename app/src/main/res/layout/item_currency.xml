@@ -4,14 +4,14 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginBottom="@dimen/recycler_margin">
+    android:layout_marginBottom="@dimen/default_margin">
 
     <ImageView
-        android:id="@+id/thumbnailImageView"
-        android:layout_width="120dp"
-        android:layout_height="80dp"
-        android:layout_marginEnd="@dimen/recycler_margin"
-        android:src="@drawable/ic_launcher_background"
+        android:id="@+id/flagImageView"
+        android:layout_width="60dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="@dimen/default_margin"
+        tools:src="@drawable/ic_launcher_background"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -19,26 +19,38 @@
     <TextView
         android:id="@+id/isoCodeTextView"
         android:lines="1"
-        android:text="TITLE"
-        android:textColor="@color/colorPrimary"
-        android:textStyle="bold"
-        android:ellipsize="end"
+        tools:text="ISO"
+        android:textColor="@color/black"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/thumbnailImageView"
-        app:layout_constraintStart_toEndOf="@id/thumbnailImageView"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/flagImageView"
+        app:layout_constraintBottom_toTopOf="@id/fullNameTextView" />
 
     <TextView
-        android:id="@+id/rateTextView"
-        android:maxLines="3"
-        android:text="DESCRIPTION"
-        android:ellipsize="end"
+        android:id="@+id/fullNameTextView"
+        android:lines="1"
+        tools:text="full name"
+        android:textColor="@color/gray"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/isoCodeTextView"
-        app:layout_constraintStart_toEndOf="@id/thumbnailImageView"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/isoCodeTextView"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+    <EditText
+        android:id="@+id/rateEditText"
+        android:clickable="false"
+        android:focusable="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="1234.0"
+        android:inputType="numberDecimal"
+        android:layout_marginEnd="@dimen/default_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:importantForAutofill="no"
+        tools:ignore="LabelFor" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

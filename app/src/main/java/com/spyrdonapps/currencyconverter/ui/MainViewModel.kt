@@ -3,7 +3,7 @@ package com.spyrdonapps.currencyconverter.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.spyrdonapps.currencyconverter.data.mappers.toUiModel
+import com.spyrdonapps.currencyconverter.data.mappers.toUiModelList
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
 import com.spyrdonapps.currencyconverter.util.extensions.interval
@@ -53,7 +53,7 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
             }.let { response ->
                 // todo cache in room db
                 Timber.d(response.toString())
-                _currenciesLiveData.postValue(Result.Success(response.toUiModel()))
+                _currenciesLiveData.postValue(Result.Success(response.toUiModelList()))
             }
         } catch (e: Exception) {
             Timber.e(e)

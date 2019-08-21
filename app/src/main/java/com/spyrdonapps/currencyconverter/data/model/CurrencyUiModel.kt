@@ -1,11 +1,11 @@
 package com.spyrdonapps.currencyconverter.data.model
 
-data class CurrencyUiModel(val isoCode: String, val rateBasedOnEuro: Double) {
+import java.util.Locale
 
-    // todo maybe get those with mapper as well?
-
-    // would need to map currency->country->flag
-
-    var flagImageUrl: String? = null
-    val fullName: String? = null
+data class CurrencyUiModel(
+    val isoCode: String,
+    val rateBasedOnEuro: Double,
+    val fullName: String
+) {
+    val flagImageUrl = "https://fxtop.com/ico/${isoCode.toLowerCase(Locale.ROOT)}.gif"
 }

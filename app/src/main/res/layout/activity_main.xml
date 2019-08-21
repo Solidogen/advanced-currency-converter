@@ -9,7 +9,7 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/recycler_margin"
+            android:layout_margin="@dimen/default_margin"
             tools:itemCount="10"
             tools:layoutManager="LinearLayoutManager"
             tools:listitem="@layout/item_currency"
