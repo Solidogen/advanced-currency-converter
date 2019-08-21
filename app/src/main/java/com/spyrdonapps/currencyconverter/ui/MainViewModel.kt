@@ -3,20 +3,16 @@ package com.spyrdonapps.currencyconverter.ui
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay2.PublishRelay
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import com.spyrdonapps.currencyconverter.util.interval
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.consumeEach
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(private val currencyService: CurrencyService) : ViewModel() {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Main)
-    private val compositeDisposable = CompositeDisposable()
     private val onClearedRelay: PublishRelay<Unit> = PublishRelay.create()
 
     // TODO change this back
@@ -24,16 +20,16 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
 //        loadData()
 //    }
 
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
     fun loadData() {
         // TODO inject schedulers for testing
         Timber.e("loadData")
-        Observable.interval(INTERVAL_CHECK_PERIOD_SECONDS, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-            .subscribe {
-                scope.launch {
-                    launchLoadData()
-                }
+        scope.launch(Dispatchers.IO) {
+            interval(periodMs = INTERVAL_CHECK_PERIOD_MS).consumeEach {
+                launchLoadData()
             }
-            .addTo(compositeDisposable)
+        }
     }
 
     // TODO get event, result classes and use them with livedata
@@ -74,6 +70,6 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
     }
 
     companion object {
-        const val INTERVAL_CHECK_PERIOD_SECONDS = 1L
+        const val INTERVAL_CHECK_PERIOD_MS = 1000L
     }
 }
