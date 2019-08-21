@@ -1,8 +1,11 @@
 package com.spyrdonapps.currencyconverter.ui
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
@@ -10,13 +13,13 @@ import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.util.GlideApp
 import kotlinx.android.synthetic.main.item_currency.view.*
 import timber.log.Timber
-import java.lang.Exception
 import java.util.Collections
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
     private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
+    private var canUpdateList = true
 
     private var items: MutableList<CurrencyUiModel> = mutableListOf()
 
@@ -41,6 +44,9 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     }
 
     fun setData(list: List<CurrencyUiModel>) {
+        if (!canUpdateList) {
+            return
+        }
         items = Collections.synchronizedList(list)
         with(items) {
             val previousTopItem = first { it.isoCode == currentTopCurrencyIsoCode }
@@ -52,11 +58,21 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private fun moveItemToTopAndNotify(item: CurrencyUiModel) {
         items.apply {
-            val selectedItemIndex = indexOf(item)
-            Collections.swap(this, selectedItemIndex, 0)
-            notifyItemMoved(selectedItemIndex, 0)
-            // sort items besides first one
-            subList(1, lastIndex).sortBy { it.isoCode }
+            recyclerView.post {
+                canUpdateList = false
+                try {
+                    val selectedItemIndex = indexOf(item)
+                    Collections.swap(this, selectedItemIndex, 0)
+                    notifyItemMoved(selectedItemIndex, 0)
+                    // sort items besides first one
+                    subList(1, lastIndex).sortBy { it.isoCode }
+                    scrollToTop()
+                } catch (e: Exception) {
+                    Timber.e(e)
+                } finally {
+                    canUpdateList = true
+                }
+            }
         }
     }
 
@@ -70,9 +86,10 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             with(view) {
                 isoCodeTextView.text = item.isoCode
                 fullNameTextView.text
-                rateEditText.setText(item.rateBasedOnEuro.toString())
-                setOnClickListener {
-                    onItemClicked(item)
+                rateEditText.run {
+                    setText(item.rateBasedOnEuro.toString())
+                    isFocusable = false
+                    isClickable = false
                 }
                 GlideApp.with(view)
                     .load(item.flagImageUrl)
@@ -82,17 +99,23 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     view.performClick()
                     false
                 }
+                setOnClickListener {
+                    onItemClicked(item, rateEditText)
+                }
             }
         }
 
-        private fun onItemClicked(item: CurrencyUiModel) {
-            try {
-                currentTopCurrencyIsoCode = item.isoCode
-                moveItemToTopAndNotify(item)
-                scrollToTop()
-            } catch (e: Exception) {
-                Timber.e(e)
+        private fun onItemClicked(item: CurrencyUiModel, rateEditText: EditText) {
+            currentTopCurrencyIsoCode = item.isoCode
+            moveItemToTopAndNotify(item)
+            rateEditText.run {
+                isFocusable = true
+                isClickable = true
+                requestFocus()
+                (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                    ?.showSoftInput(rateEditText, InputMethodManager.SHOW_IMPLICIT)
             }
+
         }
     }
 
