@@ -1,4 +1,4 @@
-package com.spyrdonapps.currencyconverter.util
+package com.spyrdonapps.currencyconverter.util.extensions
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi

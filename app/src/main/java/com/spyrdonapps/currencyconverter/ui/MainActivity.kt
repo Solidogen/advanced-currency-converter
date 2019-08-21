@@ -5,10 +5,13 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.spyrdonapps.currencyconverter.R
+import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
+import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
@@ -26,7 +29,7 @@ TODO
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
 
-    val viewModel: MainViewModel by lazy {
+    private val viewModel: MainViewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
     }
 
@@ -39,9 +42,24 @@ TODO
         setContentView(R.layout.activity_main)
         setupRecyclerView()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
+        observeViewModel()
 
         // todo remove
         viewModel.loadData()
+    }
+
+    private fun observeViewModel() {
+        viewModel.currenciesLiveData.observe(this, Observer {
+            handleCurrenciesState(it)
+        })
+    }
+
+    private fun handleCurrenciesState(result: Result<List<CurrencyUiModel>>) {
+        when (result) {
+            is Result.Success -> showList(result.data)
+            Result.Loading -> showLoading()
+            is Result.Error -> showError()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -53,34 +71,37 @@ TODO
     }
 
     private fun handleSavedInstanceStateIfNeeded(savedInstanceState: Bundle?) {
-        savedInstanceState?.getParcelable<Parcelable>(LAYOUT_MANAGER_INSTANCE_STATE_TAG)?.let {
-            layoutManagerInstanceState = it
+        savedInstanceState?.getParcelable<Parcelable>(LAYOUT_MANAGER_INSTANCE_STATE_TAG)?.let { state: Parcelable ->
+            layoutManagerInstanceState = state
         }
     }
 
-    // todo implement normal mvvm flow
-//    fun showList(list: List<YoutubeVideo>) {
-//        progressBar.isVisible = false
-//        youtubeVideoAdapter.setItems(list)
-//        restoreRecyclerPositionIfNeeded()
-//    }
+    private fun showList(list: List<CurrencyUiModel>) {
+        progressBar.isVisible = false
+        currenciesAdapter.submitList(list)
 
-    // todo call on list get
+        // todo probably will need submit list listener because diff is on bg thread, check for list adapter callbacks or recycler listeners
+        restoreRecyclerPositionIfNeeded()
+    }
+
+    private fun showLoading() {
+        progressBar.isVisible = true
+    }
+
+    private fun showError() {
+        progressBar.isVisible = false
+        AlertDialog.Builder(this)
+            .setTitle(R.string.error)
+            .setMessage("")
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
     private fun restoreRecyclerPositionIfNeeded() {
         layoutManagerInstanceState?.let {
             recyclerView.layoutManager?.onRestoreInstanceState(it)
         }
     }
-
-    // todo implement normal mvvm flow
-//    fun showError() {
-//        progressBar.isVisible = false
-//        AlertDialog.Builder(this)
-//            .setTitle(R.string.error)
-//            .setMessage("")
-//            .setPositiveButton("OK", null)
-//            .show()
-//    }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)

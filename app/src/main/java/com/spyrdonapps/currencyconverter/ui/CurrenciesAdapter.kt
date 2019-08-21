@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
+import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 
-// todo fix types
-class CurrenciesAdapter : ListAdapter<String, CurrenciesAdapter.ViewHolder>(DiffCallback) {
+class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
@@ -20,19 +20,18 @@ class CurrenciesAdapter : ListAdapter<String, CurrenciesAdapter.ViewHolder>(Diff
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
-        fun bind(item: String) {
+        fun bind(item: CurrencyUiModel) {
 
         }
     }
 
-    object DiffCallback : DiffUtil.ItemCallback<String>() {
-        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    object DiffCallback : DiffUtil.ItemCallback<CurrencyUiModel>() {
+        override fun areItemsTheSame(oldItem: CurrencyUiModel, newItem: CurrencyUiModel): Boolean {
+            return oldItem.isoCode == newItem.isoCode
         }
 
-        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun areContentsTheSame(oldItem: CurrencyUiModel, newItem: CurrencyUiModel): Boolean {
+            return oldItem == newItem
         }
-
     }
 }

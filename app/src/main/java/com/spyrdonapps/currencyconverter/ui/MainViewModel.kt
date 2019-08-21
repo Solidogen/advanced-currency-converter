@@ -1,9 +1,13 @@
 package com.spyrdonapps.currencyconverter.ui
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.jakewharton.rxrelay2.PublishRelay
+import com.spyrdonapps.currencyconverter.data.mappers.toUiModel
+import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
-import com.spyrdonapps.currencyconverter.util.interval
+import com.spyrdonapps.currencyconverter.util.extensions.interval
+import com.spyrdonapps.currencyconverter.util.state.Result
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import timber.log.Timber
@@ -13,18 +17,23 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Main)
-    private val onClearedRelay: PublishRelay<Unit> = PublishRelay.create()
+
+    private val _currenciesLiveData: MutableLiveData<Result<List<CurrencyUiModel>>> = MutableLiveData()
+    val currenciesLiveData: LiveData<Result<List<CurrencyUiModel>>> = _currenciesLiveData
+
+    // todo relay kotlin equivalent if needed? would be fun to implement
 
     // TODO change this back
 //    init {
 //        loadData()
 //    }
 
+    // TODO inject schedulers for testing
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
     fun loadData() {
-        // TODO inject schedulers for testing
-        Timber.e("loadData")
+        _currenciesLiveData.postValue(Result.Loading)
+
         scope.launch(Dispatchers.IO) {
             interval(periodMs = INTERVAL_CHECK_PERIOD_MS).consumeEach {
                 launchLoadData()
@@ -32,40 +41,21 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
         }
     }
 
-    // TODO get event, result classes and use them with livedata
     private suspend fun launchLoadData() {
-        Timber.e("launchLoadData")
         try {
-            val items = withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 currencyService.getCurrencies()
-            }.also {
-                Timber.d(it.toString())
-                // todo this already works, serialize it
+            }.let { response ->
+                Timber.d(response.toString())
+                _currenciesLiveData.postValue(Result.Success(response.toUiModel()))
             }
-
-//            view?.showList(items.toUiModel().also { list ->
-//                Timber.d(list.toString())
-//            })
         } catch (e: Exception) {
             Timber.e(e)
-//            view?.showError()
+            _currenciesLiveData.postValue(Result.Error(e))
         }
     }
 
-//    private fun CurrenciesResponse.toUiModel(): List<YoutubeVideo> {
-//        return items
-//            .map { item ->
-//                YoutubeVideo(
-//                    item.snippet.title,
-//                    item.snippet.description,
-//                    item.snippet.thumbnails.default.url
-//                )
-//            }
-//            .sortedBy { it.description.count() }
-//    }
-
     override fun onCleared() {
-        onClearedRelay.accept(Unit)
         job.cancel()
     }
 
