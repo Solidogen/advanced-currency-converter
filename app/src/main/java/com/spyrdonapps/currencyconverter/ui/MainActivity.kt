@@ -32,7 +32,7 @@ TODO
 
     // todo share scope with adapter to make some hacks for click handlers if index out of bounds
     // OR ditch this shitty ListAdapter but make sure everything still works
-    
+
 //    private val job = SupervisorJob()
 //    private val scope = CoroutineScope(job + Dispatchers.Main)
 

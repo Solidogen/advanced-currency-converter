@@ -3,31 +3,29 @@ package com.spyrdonapps.currencyconverter.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearSmoothScroller
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import kotlinx.android.synthetic.main.item_currency.view.*
 import java.util.Collections
 
-class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHolder>(DiffCallback) {
-
-    // TODO zawsze updatuja sie ratesy wszystkie poza tym na gorze (domyslnie euro, przy dotyku itemu ten item leci do gory i stoi)
+class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private var canUpdateList = true
-    private lateinit var movingItemsHelperList: MutableList<CurrencyUiModel>
-
     private lateinit var recyclerView: RecyclerView
     private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
+
+    private var items: MutableList<CurrencyUiModel> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(items[position])
     }
+
+    override fun getItemCount() = items.count()
 
     override fun onAttachedToRecyclerView(recycler: RecyclerView) {
         super.onAttachedToRecyclerView(recycler)
@@ -38,12 +36,25 @@ class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHol
         if (!canUpdateList) {
             return
         }
-        movingItemsHelperList = Collections.synchronizedList(list.toMutableList())
-        with(movingItemsHelperList) {
+        items = Collections.synchronizedList(list)
+        with(items) {
             val previousTopItem = first { it.isoCode == currentTopCurrencyIsoCode }
             remove(previousTopItem)
             add(0, previousTopItem)
-            submitList(movingItemsHelperList)
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun moveItemToTopAndNotify(item: CurrencyUiModel) {
+        items.apply {
+            val selectedItemIndex = indexOf(item)
+            Collections.swap(this, selectedItemIndex, 0)
+            val previousTopItem = items[selectedItemIndex]
+            val newTopItem = items[0]
+            notifyItemChanged(selectedItemIndex, newTopItem)
+            notifyItemChanged(0, previousTopItem)
+            // sort items besides top one
+            subList(1, lastIndex).sortBy { it.isoCode }
         }
     }
 
@@ -68,29 +79,12 @@ class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHol
                 }
             }
         }
-
         private fun onItemClicked(item: CurrencyUiModel) {
             canUpdateList = false
             currentTopCurrencyIsoCode = item.isoCode
-            movingItemsHelperList.apply {
-                sortBy { it.isoCode }
-                remove(item)
-                add(0, item)
-            }
-            notifyDataSetChanged()
+            moveItemToTopAndNotify(item)
             scrollToTop()
             canUpdateList = true
-        }
-    }
-
-    object DiffCallback : DiffUtil.ItemCallback<CurrencyUiModel>() {
-
-        override fun areItemsTheSame(oldItem: CurrencyUiModel, newItem: CurrencyUiModel): Boolean {
-            return oldItem.isoCode == newItem.isoCode
-        }
-
-        override fun areContentsTheSame(oldItem: CurrencyUiModel, newItem: CurrencyUiModel): Boolean {
-            return oldItem == newItem
         }
     }
 
