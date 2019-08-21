@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
+import kotlinx.android.synthetic.main.item_currency.view.*
 
 class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHolder>(DiffCallback) {
 
@@ -21,7 +22,10 @@ class CurrenciesAdapter : ListAdapter<CurrencyUiModel, CurrenciesAdapter.ViewHol
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         fun bind(item: CurrencyUiModel) {
-
+            with(view) {
+                isoCodeTextView.text = item.isoCode
+                rateTextView.text = item.rateBasedOnEuro.toString()
+            }
         }
     }
 

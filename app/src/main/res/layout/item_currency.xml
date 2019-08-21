@@ -17,7 +17,7 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
-        android:id="@+id/titleTextView"
+        android:id="@+id/isoCodeTextView"
         android:lines="1"
         android:text="TITLE"
         android:textColor="@color/colorPrimary"
@@ -30,13 +30,13 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
-        android:id="@+id/descriptionTextView"
+        android:id="@+id/rateTextView"
         android:maxLines="3"
         android:text="DESCRIPTION"
         android:ellipsize="end"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView"
+        app:layout_constraintTop_toBottomOf="@id/isoCodeTextView"
         app:layout_constraintStart_toEndOf="@id/thumbnailImageView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />

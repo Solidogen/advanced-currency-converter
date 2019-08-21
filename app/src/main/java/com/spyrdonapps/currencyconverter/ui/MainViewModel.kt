@@ -46,6 +46,7 @@ class MainViewModel @Inject constructor(private val currencyService: CurrencySer
             withContext(Dispatchers.IO) {
                 currencyService.getCurrencies()
             }.let { response ->
+                // todo cache in room db
                 Timber.d(response.toString())
                 _currenciesLiveData.postValue(Result.Success(response.toUiModel()))
             }

@@ -2,21 +2,16 @@ package com.spyrdonapps.currencyconverter.data.mappers
 
 import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.data.remote.CurrenciesResponse
+import kotlin.reflect.full.memberProperties
 
-fun CurrenciesResponse.toUiModel(): List<CurrencyUiModel> {
-//        return items
-//            .map { item ->
-//                YoutubeVideo(
-//                    item.snippet.title,
-//                    item.snippet.description,
-//                    item.snippet.thumbnails.default.url
-//                )
-//            }
-//            .sortedBy { it.description.count() }
-    return listOf(
-        CurrencyUiModel("ASD", "ASDASD ASD", 2.02),
-        CurrencyUiModel("ASD", "ASDASD ASD", 2.02),
-        CurrencyUiModel("ASD", "ASDASD ASD", 2.02),
-        CurrencyUiModel("ASD", "ASDASD ASD", 2.02)
-    )
-}
+/*
+* Custom deserialization in interceptor would be much better,
+* but decided to have fun with reflection anyway
+* */
+fun CurrenciesResponse.toUiModel(): List<CurrencyUiModel> =
+    rates::class.memberProperties.map {
+        CurrencyUiModel(
+            isoCode = it.name,
+            rateBasedOnEuro = it.getter.call(rates) as Double
+        )
+    }
