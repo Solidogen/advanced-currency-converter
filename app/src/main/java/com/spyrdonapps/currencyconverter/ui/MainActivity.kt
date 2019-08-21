@@ -64,6 +64,7 @@ TODO
             hasFixedSize()
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
+            // todo probably will need something to animate selected item moving to the top
             itemAnimator = null
         }
     }
@@ -76,7 +77,7 @@ TODO
 
     private fun showList(list: List<CurrencyUiModel>) {
         progressBar.isVisible = false
-        currenciesAdapter.submitList(list)
+        currenciesAdapter.setData(list)
 
         // todo probably will need submit list listener because diff is on bg thread, check for list adapter callbacks or recycler listeners
         restoreRecyclerPositionIfNeeded()
