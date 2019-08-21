@@ -14,8 +14,7 @@ fun CurrenciesResponse.toUiModelList(): List<CurrencyUiModel> =
         .map {
             CurrencyUiModel(
                 isoCode = it.name,
-                rateBasedOnEuro = it.getter.call(rates) as Double,
-                fullName = ""
+                rateBasedOnEuro = it.getter.call(rates) as Double
             )
         }
         .toMutableList()
@@ -26,6 +25,5 @@ fun CurrenciesResponse.toUiModelList(): List<CurrencyUiModel> =
 
 val euroCurrencyModel = CurrencyUiModel(
     isoCode = CurrenciesAdapter.EURO_ISO_CODE,
-    rateBasedOnEuro = 1.0,
-    fullName = ""
+    rateBasedOnEuro = 1.0
 )

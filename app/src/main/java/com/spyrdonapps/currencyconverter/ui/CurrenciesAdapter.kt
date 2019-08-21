@@ -24,13 +24,8 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private var items: MutableList<CurrencyUiModel> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.item_currency,
-                parent,
-                false
-            )
-        )
+        ViewHolder(LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_currency, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(items[position])
@@ -85,20 +80,29 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         fun bind(item: CurrencyUiModel) {
             with(view) {
                 isoCodeTextView.text = item.isoCode
-                fullNameTextView.text
-                rateEditText.run {
-                    setText(item.rateBasedOnEuro.toString())
-                    isFocusable = false
-                    isClickable = false
-                }
+                fullNameTextView.text = item.fullName
+
+                // todo find out how to save first item from getting new rate values
+                // maybe they need new values, but can't show them when first
+
+                /*if (item.isoCode != currentTopCurrencyIsoCode) {
+                    */rateEditText.run {
+                        setText(item.rateBasedOnEuro.toString())
+                        isFocusable = false
+                        isClickable = false
+                    }
+//                }
+
                 GlideApp.with(view)
                     .load(item.flagImageUrl)
                     .circleCrop()
                     .into(flagImageView)
+
                 rateEditText.setOnTouchListener { _, _ ->
                     view.performClick()
-                    false
+                    true
                 }
+
                 setOnClickListener {
                     onItemClicked(item, rateEditText)
                 }
@@ -113,9 +117,8 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                 isClickable = true
                 requestFocus()
                 (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-                    ?.showSoftInput(rateEditText, InputMethodManager.SHOW_IMPLICIT)
+                    ?.showSoftInput(rateEditText, InputMethodManager.SHOW_FORCED)
             }
-
         }
     }
 

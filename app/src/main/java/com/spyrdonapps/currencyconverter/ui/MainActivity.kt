@@ -15,12 +15,8 @@ import com.spyrdonapps.currencyconverter.data.model.CurrencyUiModel
 import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
 /*
@@ -29,7 +25,8 @@ TODO
     screen rotation OK
     save recycler position on rotate OK
     country flags/emojis
-    offline mode works
+    offline mode works (cache bitmaps from imageviews to bytearray -> string)
+    https://stackoverflow.com/questions/44761720/save-pictures-in-device-glide-library
     ui perfect
     lots of tests
 TODO
@@ -73,10 +70,6 @@ TODO
             hasFixedSize()
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
-            // todo probably will need something to animate selected item moving to the top
-            itemAnimator = DefaultItemAnimator()/*.apply {
-                supportsChangeAnimations = false
-            }*/
         }
     }
 
