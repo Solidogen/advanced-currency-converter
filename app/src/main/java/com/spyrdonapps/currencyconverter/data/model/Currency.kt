@@ -15,13 +15,16 @@ data class Currency(
     val isoCode: String,
 
     @ColumnInfo(name = "rate_based_on_euro")
-    val rateBasedOnEuro: Double
+    var rateBasedOnEuro: Double
 ) {
     @Ignore
     val flagImageUrl = "https://fxtop.com/ico/${isoCode.toLowerCase(Locale.ROOT)}.gif"
 
     @Ignore
     val fullName = getCurrencyFullNameByIsoCode(isoCode)
+
+    // todo ignored property of 'canChangeRate' with getter
+    // + rateBasedOnEuro set will depend on this prop
 
     companion object {
 

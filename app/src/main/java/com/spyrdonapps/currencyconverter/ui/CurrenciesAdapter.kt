@@ -22,7 +22,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
     private var canUpdateList = true
 
-    private var items: MutableList<Currency> = mutableListOf()
+    private var curriencies: MutableList<Currency> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
@@ -31,34 +31,39 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(curriencies[position])
     }
 
-    override fun getItemCount() = items.count()
+    override fun getItemCount() = curriencies.count()
 
     override fun onAttachedToRecyclerView(recycler: RecyclerView) {
         super.onAttachedToRecyclerView(recycler)
         recyclerView = recycler
     }
 
-    fun setData(list: List<Currency>) {
+    fun setData(newCurrencies: List<Currency>) {
         if (!canUpdateList) {
             return
         }
-        items = Collections.synchronizedList(list)
-        with(items) {
-            val previousTopItem = firstOrNull { it.isoCode == currentTopCurrencyIsoCode } ?: run {
-                Timber.e("List is empty")
-                return
+        if (curriencies.isEmpty()) {
+            if (newCurrencies.isNotEmpty()) {
+                curriencies = Collections.synchronizedList(newCurrencies)
+                notifyDataSetChanged()
             }
-            remove(previousTopItem)
-            add(0, previousTopItem)
-            notifyDataSetChanged()
+        } else {
+            if (newCurrencies.isNotEmpty()) {
+                newCurrencies.forEach { updatedCurrency ->
+                    curriencies.firstOrNull { it.isoCode == updatedCurrency.isoCode }?.let {
+                        it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
+                        notifyItemChanged(curriencies.indexOf(it))
+                    }
+                }
+            }
         }
     }
 
     private fun moveItemToTopAndNotify(item: Currency) {
-        items.apply {
+        curriencies.apply {
             recyclerView.post {
                 canUpdateList = false
                 try {
@@ -69,9 +74,14 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                      * item has to go directly to it's new sorted position, I need to calculate it right here, to spare sorting
                      */
                     Collections.swap(this, selectedItemIndex, 0)
+
+                    // todo see if I have to do this, because it animates badly
+                    notifyItemChanged(selectedItemIndex)
+
+
                     notifyItemMoved(selectedItemIndex, 0)
-                    // sort items besides first one
-                    subList(1, lastIndex).sortBy { it.isoCode }
+                    // TODO sort items besides first one
+//                    subList(1, lastIndex).sortBy { it.isoCode } // this won't work
                     scrollToTop()
                 } catch (e: Exception) {
                     Timber.e(e)
@@ -95,12 +105,9 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
                 // todo find out how to save first item from getting new rate values
                 // maybe they need new values, but can't show them when first
-
                 /*if (item.isoCode != currentTopCurrencyIsoCode) {
-                    */rateEditText.run {
-                setText(item.rateBasedOnEuro.toString())
-            }
-//                }
+
+                }*/
 
                 GlideApp.with(view)
                     .load(item.flagImageUrl)
@@ -108,9 +115,12 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     .circleCrop()
                     .into(flagImageView)
 
-                rateEditText.setOnTouchListener { _, _ ->
-                    view.performClick()
-                    true
+                rateEditText.apply {
+                    setText(item.rateBasedOnEuro.toString())
+                    setOnTouchListener { _, _ ->
+                        view.performClick()
+                        true
+                    }
                 }
 
                 setOnClickListener {
