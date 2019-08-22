@@ -40,8 +40,6 @@
 
     <EditText
         android:id="@+id/rateEditText"
-        android:clickable="false"
-        android:focusable="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="1234.0"

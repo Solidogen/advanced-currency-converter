@@ -99,8 +99,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                 /*if (item.isoCode != currentTopCurrencyIsoCode) {
                     */rateEditText.run {
                 setText(item.rateBasedOnEuro.toString())
-                isFocusable = false
-                isClickable = false
             }
 //                }
 
@@ -125,8 +123,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             currentTopCurrencyIsoCode = item.isoCode
             moveItemToTopAndNotify(item)
             rateEditText.run {
-                isFocusable = true
-                isClickable = true
                 requestFocus()
                 (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
                     ?.showSoftInput(rateEditText, InputMethodManager.SHOW_FORCED)
