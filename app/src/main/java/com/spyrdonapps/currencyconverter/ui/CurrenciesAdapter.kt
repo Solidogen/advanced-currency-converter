@@ -74,11 +74,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                      * item has to go directly to it's new sorted position, I need to calculate it right here, to spare sorting
                      */
                     Collections.swap(this, selectedItemIndex, 0)
-
-                    // todo see if I have to do this, because it animates badly
-                    notifyItemChanged(selectedItemIndex)
-
-
+//                    notifyItemChanged(selectedItemIndex)
                     notifyItemMoved(selectedItemIndex, 0)
                     // TODO sort items besides first one
 //                    subList(1, lastIndex).sortBy { it.isoCode } // this won't work

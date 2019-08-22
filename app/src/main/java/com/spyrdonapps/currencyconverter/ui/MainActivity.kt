@@ -16,6 +16,7 @@ import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 import javax.inject.Inject
+import androidx.recyclerview.widget.SimpleItemAnimator
 
 class MainActivity : AppCompatActivity() {
 
@@ -62,9 +63,10 @@ TODO
 
     private fun setupRecyclerView() {
         recyclerView.apply {
-            hasFixedSize()
+            setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
