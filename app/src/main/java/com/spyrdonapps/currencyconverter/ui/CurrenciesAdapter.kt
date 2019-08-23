@@ -14,6 +14,7 @@ import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.util.GlideApp
 import com.spyrdonapps.currencyconverter.util.extensions.addTextChangedListener
 import com.spyrdonapps.currencyconverter.util.extensions.capitalizeWords
+import com.spyrdonapps.currencyconverter.util.extensions.showKeyboard
 import kotlinx.android.synthetic.main.item_currency.view.*
 import timber.log.Timber
 import java.util.Collections
@@ -84,13 +85,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         }
     }
 
-    private fun showKeyboard(view: View) {
-        with(view) {
-            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-                ?.showSoftInput(view, InputMethodManager.SHOW_FORCED)
-        }
-    }
-
     private fun scrollToTop() {
         (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 1)
     }
@@ -147,7 +141,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             rateEditText.run {
                 requestFocus()
                 setSelection(text.length)
-                showKeyboard(this)
+                showKeyboard()
             }
         }
     }

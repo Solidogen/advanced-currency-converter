@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.Currency
+import com.spyrdonapps.currencyconverter.util.extensions.hideKeyboard
 import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
@@ -36,6 +37,11 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
         observeViewModel()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        hideKeyboard()
     }
 
     private fun setupToolbar() {
