@@ -133,7 +133,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                         true
                     }
                     addTextChangedListener { newText ->
-                        currency.enteredValue = newText.toDoubleOrNull() ?: 0.toDouble()
+                        currency.enteredValue = newText.toDoubleOrNull() ?: 0.0
                     }
                 }
             }
