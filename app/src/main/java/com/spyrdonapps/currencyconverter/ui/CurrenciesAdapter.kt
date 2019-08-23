@@ -55,7 +55,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     ?.let {
                         it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
                         if (it.canChangeDisplayedRate) {
-                            it.displayableValue = it.rateBasedOnEuro * firstCurrency.enteredValue
+                            it.setDisplayableValueBasedOnFirstCurrency(firstCurrency)
                         }
                     }
                 currencies.filter { it.canChangeDisplayedRate }

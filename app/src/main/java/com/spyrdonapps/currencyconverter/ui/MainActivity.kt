@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
 /*
 TODO
     create conversion app kotlin:
-    calculate all rates based on first rate multiplier
     lots of tests + inject schedulers for testing
 */
     private val currenciesAdapter = CurrenciesAdapter()

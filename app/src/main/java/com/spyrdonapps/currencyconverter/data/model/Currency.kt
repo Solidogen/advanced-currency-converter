@@ -32,14 +32,17 @@ data class Currency(
     var enteredValue = rateBasedOnEuro
 
     @Ignore
-    var displayableValue = rateBasedOnEuro
+    private var displayableValue = rateBasedOnEuro
+
+    fun setDisplayableValueBasedOnFirstCurrency(firstCurrency: Currency) {
+        displayableValue = rateBasedOnEuro * firstCurrency.enteredValue / firstCurrency.rateBasedOnEuro
+    }
 
     fun getFormattedDisplayableRateBasedOnEuro(): String {
-        val rateToDisplay = displayableValue
-        return if (isWholeNumber(rateToDisplay)) {
-            rateToDisplay.toInt().toString()
+        return if (isWholeNumber(displayableValue)) {
+            displayableValue.toInt().toString()
         } else {
-            decimalFormat.format(rateToDisplay)
+            decimalFormat.format(displayableValue)
         }
     }
 
