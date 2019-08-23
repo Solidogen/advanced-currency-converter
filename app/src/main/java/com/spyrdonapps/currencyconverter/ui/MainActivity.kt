@@ -18,11 +18,6 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
-/*
-TODO
-    create conversion app kotlin:
-    lots of tests + inject schedulers for testing
-*/
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
 
