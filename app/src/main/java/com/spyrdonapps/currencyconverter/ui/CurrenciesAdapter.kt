@@ -16,7 +16,6 @@ import com.spyrdonapps.currencyconverter.util.extensions.addTextChangedListener
 import com.spyrdonapps.currencyconverter.util.extensions.capitalizeWords
 import kotlinx.android.synthetic.main.item_currency.view.*
 import timber.log.Timber
-import java.lang.NumberFormatException
 import java.util.Collections
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
