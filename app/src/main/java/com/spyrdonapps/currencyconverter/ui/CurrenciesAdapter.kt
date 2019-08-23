@@ -19,10 +19,9 @@ import java.util.Collections
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
+    private var curriencies: MutableList<Currency> = mutableListOf()
     private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
     private var canUpdateList = true
-
-    private var curriencies: MutableList<Currency> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
@@ -39,52 +38,38 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     }
 
     fun setData(newCurrencies: List<Currency>) {
-        if (!canUpdateList) {
+        if (!canUpdateList || newCurrencies.isEmpty()) {
             return
         }
         if (curriencies.isEmpty()) {
-            if (newCurrencies.isNotEmpty()) {
-                curriencies = Collections.synchronizedList(newCurrencies)
-                notifyDataSetChanged()
-            }
+            curriencies = Collections.synchronizedList(newCurrencies)
         } else {
-            if (newCurrencies.isNotEmpty()) {
-                newCurrencies.forEach { updatedCurrency ->
-                    curriencies.firstOrNull { it.isoCode == updatedCurrency.isoCode }?.let {
-                        it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
-                        notifyItemChanged(curriencies.indexOf(it))
-                    }
+            newCurrencies.forEach { updatedCurrency ->
+                curriencies.firstOrNull { it.isoCode == updatedCurrency.isoCode }?.let {
+                    it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
                 }
             }
         }
+        notifyDataSetChanged()
     }
 
-    private fun moveItemToTopAndNotify(position: Int) {
+    private fun moveItemToTopAndNotify(currency: Currency, position: Int) {
         curriencies.apply {
             recyclerView.post {
                 canUpdateList = false
                 try {
-                    val selectedItemIndex = position.also {
-                        Timber.e("selectedItemIndex: $it, currencies: ${this.map { c -> c.isoCode }}")
-                    }
-                    /*
-                     *TODO
-                     * this swap is not good enough - it causes upcoming sortBy to lag the screen
-                     * item has to go directly to it's new sorted position, I need to calculate it right here, to spare sorting
-                     */
-                    Collections.swap(this, selectedItemIndex, 0)
-                    notifyItemMoved(selectedItemIndex, 0)
-                    // TODO sort items besides first one
+                    // TODO instead of sorting: move second item directly to it's place and it's basically done
 //                    subList(1, lastIndex).sortBy { it.isoCode } // this won't work
+
+                    curriencies.removeAt(position)
+                    curriencies.add(0, currency)
+                    notifyItemMoved(position, 0)
+
                     scrollToTop()
                 } catch (e: Exception) {
                     Timber.e(e)
                 } finally {
-                    // todo think how to avoid swapping items on new list changes when can update list
-//                    GlobalScope.launch {
-//                        delay(3000)
-//                        canUpdateList = true
-//                    }
+                    canUpdateList = true
                 }
             }
         }
@@ -105,6 +90,10 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
         fun bind(currency: Currency) {
             with(view) {
+                setOnClickListener {
+                    onItemClicked(currency, adapterPosition, rateEditText)
+                }
+
                 isoCodeTextView.text = currency.isoCode
                 fullNameTextView.text = currency.fullName
 
@@ -127,16 +116,13 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                         true
                     }
                 }
-
-                setOnClickListener {
-                    onItemClicked(currency, adapterPosition, rateEditText)
-                }
             }
         }
 
-        private fun onItemClicked(currency: Currency, adapterPosition: Int, rateEditText: EditText) {
+        private fun onItemClicked(currency: Currency, position: Int, rateEditText: EditText) {
+            Timber.d("Currency clicked: ${currency.isoCode}")
             currentTopCurrencyIsoCode = currency.isoCode
-            moveItemToTopAndNotify(adapterPosition)
+            moveItemToTopAndNotify(currency, position)
             rateEditText.run {
                 requestFocus()
                 showKeyboard(this)
