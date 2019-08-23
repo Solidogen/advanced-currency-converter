@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
 /*
 TODO
     create conversion app kotlin:
+    calculate all rates based on first rate multiplier
     ui perfect
     lots of tests
 */
@@ -89,7 +90,6 @@ TODO
     }
 
     private fun showLoading() {
-        // todo fix progress bar, no idea why it stopped showing
         progressBar.isVisible = true
     }
 
