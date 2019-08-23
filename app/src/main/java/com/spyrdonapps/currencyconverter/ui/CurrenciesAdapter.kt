@@ -138,6 +138,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             moveItemToTopAndNotify(currency, position)
             rateEditText.run {
                 requestFocus()
+                setSelection(text.length)
                 showKeyboard(this)
             }
         }
