@@ -69,7 +69,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private fun moveItemToTopAndNotify(currency: Currency, position: Int) {
         currencies.apply {
             recyclerView.post {
-                // todo check if this flag is still needed at the end
                 canUpdateList = false
                 try {
                     currencies.removeAt(position)
