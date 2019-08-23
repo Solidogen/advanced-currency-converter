@@ -23,8 +23,8 @@ data class Currency(
     @Ignore
     val fullName = getCurrencyFullNameByIsoCode(isoCode)
 
-    // todo ignored property of 'canChangeRate' with getter
-    // + rateBasedOnEuro set will depend on this prop
+    @Ignore
+    var canChangeRate = true
 
     companion object {
 

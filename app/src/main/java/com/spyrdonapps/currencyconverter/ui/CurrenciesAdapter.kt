@@ -20,11 +20,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
     private var curriencies: MutableList<Currency> = mutableListOf()
-
-    // todo instead of this, let Currency have a "canUpdateRate" property set inside
-    // and handle checking in viewholder
-    private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
-
     private var canUpdateList = true
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -90,6 +85,12 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 1)
     }
 
+    private fun setCurrencyRateNotChangable(currency: Currency) {
+        curriencies.forEach {
+            it.canChangeRate = it.isoCode != currency.isoCode
+        }
+    }
+
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         fun bind(currency: Currency) {
@@ -108,7 +109,13 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     .into(flagImageView)
 
                 rateEditText.apply {
-                    setText(currency.rateBasedOnEuro.toString())
+                    // TODO this doesn't work very good, because viewholder needs to delete old rate value from previous item
+                    // I need to handle clearing this view in some way before I put the values here, I may cache the snapshot of
+                    // all currencies while item was clicked and let this currency stay at it + freeze it until user is done
+                    // typing. need additional checks
+                    if (currency.canChangeRate) {
+                        setText(currency.rateBasedOnEuro.toString())
+                    }
                     setOnTouchListener { _, _ ->
                         view.performClick()
                         true
@@ -119,7 +126,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
         private fun onItemClicked(currency: Currency, position: Int, rateEditText: EditText) {
             Timber.d("Currency clicked: ${currency.isoCode}")
-            currentTopCurrencyIsoCode = currency.isoCode
+            setCurrencyRateNotChangable(currency)
             moveItemToTopAndNotify(currency, position)
             rateEditText.run {
                 requestFocus()

@@ -84,6 +84,7 @@ TODO
     }
 
     private fun showLoading() {
+        // todo fix progress bar, no idea why it stopped showing
         progressBar.isVisible = true
     }
 
