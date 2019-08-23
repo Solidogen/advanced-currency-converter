@@ -1,6 +1,6 @@
 package com.spyrdonapps.currencyconverter.di.modules
 
-import com.spyrdonapps.currencyconverter.data.local.AppCurrencyRepository
+import com.spyrdonapps.currencyconverter.data.repository.AppCurrencyRepository
 import com.spyrdonapps.currencyconverter.data.local.CurrencyDao
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
 import com.spyrdonapps.currencyconverter.data.repository.CurrencyRepository
@@ -17,6 +17,7 @@ abstract class RepositoryModule {
         @JvmStatic
         @Provides
         @ApplicationScope
-        fun currencyRepository(service: CurrencyService, dao: CurrencyDao): CurrencyRepository =  AppCurrencyRepository(service, dao)
+        fun currencyRepository(service: CurrencyService, dao: CurrencyDao): CurrencyRepository =
+            AppCurrencyRepository(service, dao)
     }
 }

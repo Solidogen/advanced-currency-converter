@@ -19,17 +19,17 @@ import java.util.Collections
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
-    private var curriencies: MutableList<Currency> = mutableListOf()
+    private var currencies: MutableList<Currency> = mutableListOf()
     private var canUpdateList = true
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(curriencies[position])
+        holder.bind(currencies[position])
     }
 
-    override fun getItemCount() = curriencies.count()
+    override fun getItemCount() = currencies.count()
 
     override fun onAttachedToRecyclerView(recycler: RecyclerView) {
         super.onAttachedToRecyclerView(recycler)
@@ -40,33 +40,33 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         if (!canUpdateList || newCurrencies.isEmpty()) {
             return
         }
-        if (curriencies.isEmpty()) {
-            curriencies = Collections.synchronizedList(newCurrencies)
+        if (currencies.isEmpty()) {
+            currencies = Collections.synchronizedList(newCurrencies)
             notifyDataSetChanged()
         } else {
             newCurrencies.forEach { updatedCurrency ->
-                curriencies
+                currencies
                     .firstOrNull {
                         it.isoCode == updatedCurrency.isoCode
                     }
                     ?.let {
                         it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
                     }
-                curriencies.filter { it.canChangeDisplayedRate }
+                currencies.filter { it.canChangeDisplayedRate }
                     .forEach {
-                        notifyItemChanged(curriencies.indexOf(it))
+                        notifyItemChanged(currencies.indexOf(it))
                     }
             }
         }
     }
 
     private fun moveItemToTopAndNotify(currency: Currency, position: Int) {
-        curriencies.apply {
+        currencies.apply {
             recyclerView.post {
                 canUpdateList = false
                 try {
-                    curriencies.removeAt(position)
-                    curriencies.add(0, currency)
+                    currencies.removeAt(position)
+                    currencies.add(0, currency)
                     notifyItemMoved(position, 0)
                     scrollToTop()
                 } catch (e: Exception) {
@@ -90,14 +90,14 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     }
 
     private fun setCurrencyRateNotChangable(currency: Currency) {
-        curriencies.forEach {
+        currencies.forEach {
             // TODO check why EUR is not getting redrawn, disable item animator to check or print status
             it.canChangeDisplayedRate = it.isoCode != currency.isoCode
         }
     }
 
     private fun getCachedFormattedRateForCurrency(currency: Currency): String {
-        return curriencies.first { it.isoCode == currency.isoCode }.formattedRateBasedOnEuro
+        return currencies.first { it.isoCode == currency.isoCode }.formattedRateBasedOnEuro
     }
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {

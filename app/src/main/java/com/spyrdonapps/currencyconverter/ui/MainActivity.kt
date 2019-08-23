@@ -41,9 +41,14 @@ TODO
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setupToolbar()
         setupRecyclerView()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
         observeViewModel()
+    }
+
+    private fun setupToolbar() {
+        supportActionBar?.setTitle(R.string.toolbar_text)
     }
 
     private fun observeViewModel() {

@@ -1,21 +1,19 @@
-package com.spyrdonapps.currencyconverter.data.local
+package com.spyrdonapps.currencyconverter.data.repository
 
+import com.spyrdonapps.currencyconverter.data.local.CurrencyDao
 import com.spyrdonapps.currencyconverter.data.mappers.toCurrencyList
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
-import com.spyrdonapps.currencyconverter.data.repository.CurrencyRepository
 
 class AppCurrencyRepository(private val currencyService: CurrencyService, private val currencyDao: CurrencyDao) : CurrencyRepository {
 
     override suspend fun getCurrencies(): List<Currency> {
         return try {
-            currencyService.getCurrenciesResponse().toCurrencyList()
+            val currencyList = currencyService.getCurrenciesResponse().toCurrencyList()
+            currencyDao.saveCurrencies(currencyList)
+            return currencyList
         } catch (e: Exception) {
             currencyDao.getCurrencies()
         }
-    }
-
-    override suspend fun saveCurrencies(list: List<Currency>) {
-        currencyDao.saveCurrencies(list)
     }
 }
