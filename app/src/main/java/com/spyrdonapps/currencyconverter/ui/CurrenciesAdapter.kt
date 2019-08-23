@@ -134,6 +134,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     }
                     addTextChangedListener { newText ->
                         currency.enteredValue = newText.toDoubleOrNull() ?: 0.0
+                        // todo try to instantly update rates without destroying everything
                     }
                 }
             }
