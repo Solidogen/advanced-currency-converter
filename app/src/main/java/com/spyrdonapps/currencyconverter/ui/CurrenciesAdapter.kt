@@ -20,7 +20,11 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
     private var curriencies: MutableList<Currency> = mutableListOf()
+
+    // todo instead of this, let Currency have a "canUpdateRate" property set inside
+    // and handle checking in viewholder
     private var currentTopCurrencyIsoCode: String = EURO_ISO_CODE
+
     private var canUpdateList = true
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -96,12 +100,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
                 isoCodeTextView.text = currency.isoCode
                 fullNameTextView.text = currency.fullName
-
-                // todo find out how to save first item from getting new rate values
-                // maybe they need new values, but can't show them when first
-                /*if (item.isoCode != currentTopCurrencyIsoCode) {
-
-                }*/
 
                 GlideApp.with(view)
                     .load(currency.flagImageUrl)
