@@ -91,7 +91,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(0, 1)
     }
 
-    private fun setCurrencyRateNotChangable(currency: Currency) {
+    private fun setCurrencyRateNotChangeable(currency: Currency) {
         currencies.forEach {
             it.canChangeDisplayedRate = it.isoCode != currency.isoCode
         }
@@ -134,7 +134,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
         private fun onItemClicked(currency: Currency, position: Int, rateEditText: EditText) {
             Timber.d("Currency clicked: ${currency.isoCode}")
-            setCurrencyRateNotChangable(currency)
+            setCurrencyRateNotChangeable(currency)
             moveItemToTopAndNotify(currency, position)
             rateEditText.run {
                 requestFocus()

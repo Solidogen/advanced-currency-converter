@@ -30,7 +30,7 @@ data class Currency(
 
     fun getFormattedRateBasedOnEuro(multiplier: Double): String {
         val rateToDisplay = rateBasedOnEuro * multiplier
-        return if (rateToDisplay % 1.0 == 0.0) {
+        return if (isWholeNumber(rateToDisplay)) {
             rateToDisplay.toInt().toString()
         } else {
             decimalFormat.format(rateToDisplay)
@@ -38,6 +38,8 @@ data class Currency(
     }
 
     companion object {
+
+        private fun isWholeNumber(number: Double) = number % 1.0 == 0.0
 
         private val decimalFormat = DecimalFormat("#.##").apply {
             roundingMode = RoundingMode.CEILING
