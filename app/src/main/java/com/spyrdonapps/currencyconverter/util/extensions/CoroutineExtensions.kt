@@ -1,12 +1,19 @@
 package com.spyrdonapps.currencyconverter.util.extensions
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
 
-fun CoroutineScope.interval(periodMs: Long) = produce {
-    while (true) {
-        send(Unit)
-        delay(periodMs)
+suspend fun interval(periodMs: Long, block: () -> Unit) {
+    runBlocking {
+        flow {
+            while (true) {
+                emit(Unit)
+                delay(periodMs)
+            }
+        }.collect {
+            block()
+        }
     }
 }

@@ -10,7 +10,7 @@ import com.spyrdonapps.currencyconverter.util.state.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -33,8 +33,10 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         _currenciesLiveData.postValue(Result.Loading)
 
         scope.launch(Dispatchers.IO) {
-            interval(periodMs = INTERVAL_CHECK_PERIOD_MS).consumeEach {
-                launchLoadData()
+            interval(periodMs = INTERVAL_CHECK_PERIOD_MS) {
+                launch {
+                    launchLoadData()
+                }
             }
         }
     }
