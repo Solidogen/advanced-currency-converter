@@ -7,6 +7,7 @@ import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
 
 class AppCurrencyRepository(private val currencyService: CurrencyService, private val currencyDao: CurrencyDao) : CurrencyRepository {
 
+    // TODO pass the error (?) as well somehow, user needs to be notified about network error
     override suspend fun getCurrencies(): List<Currency> {
         return try {
             val currencyList = currencyService.getCurrenciesResponse().toCurrencyList()
