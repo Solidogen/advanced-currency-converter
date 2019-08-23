@@ -20,12 +20,12 @@ fun CurrenciesResponse.toCurrencyList(): List<Currency> =
         .toMutableList()
         .apply {
             sortBy { it.isoCode }
-            add(0, euroCurrencyModel.apply {
-                canChangeDisplayedRate = false
-            })
+            add(0, euroCurrencyModel)
         }
 
 val euroCurrencyModel = Currency(
     isoCode = CurrenciesAdapter.EURO_ISO_CODE,
     rateBasedOnEuro = 1.0
-)
+).apply {
+    canChangeDisplayedRate = false
+}
