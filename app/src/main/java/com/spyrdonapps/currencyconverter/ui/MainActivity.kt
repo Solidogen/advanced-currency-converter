@@ -94,6 +94,7 @@ TODO
     }
 
     private fun showError(exception: Exception) {
+        // todo ditch this flag and alert, simply show "sync off" icon in the corner
         if (wasNetworkErrorShown) {
             return
         }
