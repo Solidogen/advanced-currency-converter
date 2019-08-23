@@ -58,7 +58,7 @@ TODO
         when (result) {
             is Result.Success -> showList(result.data)
             Result.Loading -> showLoading()
-            is Result.Error -> showError()
+            is Result.Error -> showError(result.data)
         }
     }
 
@@ -91,9 +91,13 @@ TODO
         syncOffImageView.isVisible = false
     }
 
-    private fun showError() {
+    private fun showError(data: List<Currency>?) {
         progressBar.isVisible = false
         syncOffImageView.isVisible = true
+        data?.let {
+            currenciesAdapter.setData(it)
+        }
+        restoreRecyclerPositionIfNeeded()
     }
 
     private fun restoreRecyclerPositionIfNeeded() {

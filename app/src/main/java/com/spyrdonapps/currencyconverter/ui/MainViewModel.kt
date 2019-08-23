@@ -34,18 +34,27 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         scope.launch(Dispatchers.IO) {
             interval(periodMs = INTERVAL_CHECK_PERIOD_MS) {
                 launch {
-                    launchLoadData()
+                    launchLoadDataFromRemote()
                 }
             }
         }
     }
 
-    private suspend fun launchLoadData() {
+    private suspend fun launchLoadDataFromRemote() = withContext(Dispatchers.IO) {
         try {
-            withContext(Dispatchers.IO) {
-                currencyRepository.getCurrencies()
-            }.let { currencies ->
+            currencyRepository.getCurrenciesFromRemote().let { currencies ->
                 _currenciesLiveData.postValue(Result.Success(currencies))
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+            launchLoadDataFromCache(e)
+        }
+    }
+
+    private suspend fun launchLoadDataFromCache(e: Exception) {
+        try {
+            currencyRepository.getCurrenciesFromCache().let { cachedCurrencies ->
+                _currenciesLiveData.postValue(Result.Error(e, cachedCurrencies.takeUnless { it.isEmpty() }))
             }
         } catch (e: Exception) {
             Timber.e(e)

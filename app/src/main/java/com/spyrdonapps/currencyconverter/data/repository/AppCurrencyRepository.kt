@@ -4,17 +4,18 @@ import com.spyrdonapps.currencyconverter.data.local.CurrencyDao
 import com.spyrdonapps.currencyconverter.data.mappers.toCurrencyList
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
+import java.io.IOException
 
 class AppCurrencyRepository(private val currencyService: CurrencyService, private val currencyDao: CurrencyDao) : CurrencyRepository {
 
-    // TODO pass the error (?) as well somehow, user needs to be notified about network error
-    override suspend fun getCurrencies(): List<Currency> {
-        return try {
-            val currencyList = currencyService.getCurrenciesResponse().toCurrencyList()
-            currencyDao.saveCurrencies(currencyList)
-            return currencyList
-        } catch (e: Exception) {
-            currencyDao.getCurrencies()
+    override suspend fun getCurrenciesFromRemote(): List<Currency> {
+        currencyService.getCurrenciesResponse().toCurrencyList().let { list ->
+            currencyDao.saveCurrencies(list)
+            return list
         }
+    }
+
+    override suspend fun getCurrenciesFromCache(): List<Currency> {
+        return currencyDao.getCurrencies()
     }
 }
