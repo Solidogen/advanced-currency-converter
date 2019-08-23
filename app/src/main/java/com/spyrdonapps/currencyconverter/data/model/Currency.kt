@@ -28,8 +28,14 @@ data class Currency(
     @Ignore
     var canChangeDisplayedRate = true
 
-    fun getFormattedRateBasedOnEuro(multiplier: Double): String {
-        val rateToDisplay = rateBasedOnEuro * multiplier
+    @Ignore
+    var enteredValue = rateBasedOnEuro
+
+    @Ignore
+    var displayableValue = rateBasedOnEuro
+
+    fun getFormattedDisplayableRateBasedOnEuro(): String {
+        val rateToDisplay = displayableValue
         return if (isWholeNumber(rateToDisplay)) {
             rateToDisplay.toInt().toString()
         } else {
