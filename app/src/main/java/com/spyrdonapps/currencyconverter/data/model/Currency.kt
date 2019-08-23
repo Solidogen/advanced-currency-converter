@@ -5,6 +5,8 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.spyrdonapps.currencyconverter.ui.CurrenciesAdapter
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.Locale
 
 @Entity(tableName = "currencies")
@@ -26,15 +28,20 @@ data class Currency(
     @Ignore
     var canChangeDisplayedRate = true
 
-    // todo switch to formattedRateBasedOnTopItem and make it a function
-    val formattedRateBasedOnEuro: String
-        get() = if (rateBasedOnEuro % 1.0 == 0.0) {
-            rateBasedOnEuro.toInt().toString()
+    fun getFormattedRateBasedOnEuro(multiplier: Double): String {
+        val rateToDisplay = rateBasedOnEuro * multiplier
+        return if (rateToDisplay % 1.0 == 0.0) {
+            rateToDisplay.toInt().toString()
         } else {
-            rateBasedOnEuro.toString()
+            decimalFormat.format(rateToDisplay)
         }
+    }
 
     companion object {
+
+        private val decimalFormat = DecimalFormat("#.##").apply {
+            roundingMode = RoundingMode.CEILING
+        }
 
         private fun getCurrencyFullNameByIsoCode(isoCode: String): String {
             return when (isoCode) {
