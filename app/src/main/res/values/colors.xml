@@ -6,4 +6,5 @@
     <color name="statusBarColor">@color/gray</color>
     <color name="gray">#AAA</color>
     <color name="black">@android:color/black</color>
+    <color name="ic_launcher_background">#13A64E</color>
 </resources>
