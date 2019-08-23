@@ -2,7 +2,6 @@ package com.spyrdonapps.currencyconverter.ui
 
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
@@ -14,9 +13,7 @@ import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.util.state.Result
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.IOException
 import javax.inject.Inject
-import androidx.recyclerview.widget.SimpleItemAnimator
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,7 +26,6 @@ TODO
 */
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
-    private var wasNetworkErrorShown = false
 
     private val viewModel: MainViewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
@@ -62,7 +58,7 @@ TODO
         when (result) {
             is Result.Success -> showList(result.data)
             Result.Loading -> showLoading()
-            is Result.Error -> showError(result.exception)
+            is Result.Error -> showError()
         }
     }
 
@@ -85,27 +81,19 @@ TODO
 
     private fun showList(list: List<Currency>) {
         progressBar.isVisible = false
+        syncOffImageView.isVisible = false
         currenciesAdapter.setData(list)
         restoreRecyclerPositionIfNeeded()
     }
 
     private fun showLoading() {
         progressBar.isVisible = true
+        syncOffImageView.isVisible = false
     }
 
-    private fun showError(exception: Exception) {
-        // todo ditch this flag and alert, simply show "sync off" icon in the corner
-        if (wasNetworkErrorShown) {
-            return
-        }
+    private fun showError() {
         progressBar.isVisible = false
-        wasNetworkErrorShown = true
-
-        AlertDialog.Builder(this)
-            .setTitle(if (exception is IOException) R.string.network_error else R.string.error)
-            .setMessage("")
-            .setPositiveButton("OK", null)
-            .show()
+        syncOffImageView.isVisible = true
     }
 
     private fun restoreRecyclerPositionIfNeeded() {
