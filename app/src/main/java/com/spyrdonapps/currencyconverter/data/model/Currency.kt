@@ -24,7 +24,15 @@ data class Currency(
     val fullName = getCurrencyFullNameByIsoCode(isoCode)
 
     @Ignore
-    var canChangeRate = true
+    var canChangeDisplayedRate = true
+
+    // todo switch to formattedRateBasedOnTopItem and make it a function
+    val formattedRateBasedOnEuro: String
+        get() = if (rateBasedOnEuro % 1.0 == 0.0) {
+            rateBasedOnEuro.toInt().toString()
+        } else {
+            rateBasedOnEuro.toString()
+        }
 
     companion object {
 

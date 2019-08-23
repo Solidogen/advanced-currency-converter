@@ -28,7 +28,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         loadData()
     }
 
-    // TODO inject schedulers for testing
+    // TODO tests + inject schedulers for testing
     private fun loadData() {
         _currenciesLiveData.postValue(Result.Loading)
 

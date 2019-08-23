@@ -42,14 +42,22 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         }
         if (curriencies.isEmpty()) {
             curriencies = Collections.synchronizedList(newCurrencies)
+            notifyDataSetChanged()
         } else {
             newCurrencies.forEach { updatedCurrency ->
-                curriencies.firstOrNull { it.isoCode == updatedCurrency.isoCode }?.let {
-                    it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
-                }
+                curriencies
+                    .firstOrNull {
+                        it.isoCode == updatedCurrency.isoCode
+                    }
+                    ?.let {
+                        it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
+                    }
+                curriencies.filter { it.canChangeDisplayedRate }
+                    .forEach {
+                        notifyItemChanged(curriencies.indexOf(it))
+                    }
             }
         }
-        notifyDataSetChanged()
     }
 
     private fun moveItemToTopAndNotify(currency: Currency, position: Int) {
@@ -57,13 +65,9 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             recyclerView.post {
                 canUpdateList = false
                 try {
-                    // TODO instead of sorting: move second item directly to it's place and it's basically done
-//                    subList(1, lastIndex).sortBy { it.isoCode } // this won't work
-
                     curriencies.removeAt(position)
                     curriencies.add(0, currency)
                     notifyItemMoved(position, 0)
-
                     scrollToTop()
                 } catch (e: Exception) {
                     Timber.e(e)
@@ -87,8 +91,13 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
     private fun setCurrencyRateNotChangable(currency: Currency) {
         curriencies.forEach {
-            it.canChangeRate = it.isoCode != currency.isoCode
+            // TODO check why EUR is not getting redrawn, disable item animator to check or print status
+            it.canChangeDisplayedRate = it.isoCode != currency.isoCode
         }
+    }
+
+    private fun getCachedFormattedRateForCurrency(currency: Currency): String {
+        return curriencies.first { it.isoCode == currency.isoCode }.formattedRateBasedOnEuro
     }
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
@@ -109,12 +118,10 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     .into(flagImageView)
 
                 rateEditText.apply {
-                    // TODO this doesn't work very good, because viewholder needs to delete old rate value from previous item
-                    // I need to handle clearing this view in some way before I put the values here, I may cache the snapshot of
-                    // all currencies while item was clicked and let this currency stay at it + freeze it until user is done
-                    // typing. need additional checks
-                    if (currency.canChangeRate) {
-                        setText(currency.rateBasedOnEuro.toString())
+                    if (currency.canChangeDisplayedRate) {
+                        setText(currency.formattedRateBasedOnEuro)
+                    } else {
+                        setText(getCachedFormattedRateForCurrency(currency))
                     }
                     setOnTouchListener { _, _ ->
                         view.performClick()

@@ -23,7 +23,6 @@ class MainActivity : AppCompatActivity() {
 /*
 TODO
     create conversion app kotlin:
-    fix sorting lags
     ui perfect
     lots of tests
 */
@@ -66,7 +65,8 @@ TODO
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
-            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+            // todo commented for testing, uncomment when done debugging
+//            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
