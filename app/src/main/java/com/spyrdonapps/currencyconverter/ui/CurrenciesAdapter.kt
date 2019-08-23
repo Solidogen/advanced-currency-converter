@@ -12,6 +12,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.util.GlideApp
+import com.spyrdonapps.currencyconverter.util.extensions.addTextChangedListener
+import com.spyrdonapps.currencyconverter.util.extensions.capitalizeWords
 import kotlinx.android.synthetic.main.item_currency.view.*
 import timber.log.Timber
 import java.util.Collections
@@ -22,8 +24,8 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private var currencies: MutableList<Currency> = mutableListOf()
     private var canUpdateList = true
 
-    private val currentRateMultiplier
-        get() = currencies.first().rateBasedOnEuro
+    private val firstCurrency
+        get() = currencies.first()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
@@ -52,6 +54,9 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     .firstOrNull { it.isoCode == updatedCurrency.isoCode }
                     ?.let {
                         it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
+                        if (it.canChangeDisplayedRate) {
+                            it.setDisplayableValueBasedOnFirstCurrency(firstCurrency)
+                        }
                     }
                 currencies.filter { it.canChangeDisplayedRate }
                     .forEach {
@@ -98,7 +103,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     }
 
     private fun getCachedFormattedRateForCurrency(currency: Currency): String {
-        return currencies.first { it.isoCode == currency.isoCode }.getFormattedRateBasedOnEuro(currentRateMultiplier)
+        return currencies.first { it.isoCode == currency.isoCode }.getFormattedDisplayableRateBasedOnEuro()
     }
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
@@ -110,7 +115,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                 }
 
                 isoCodeTextView.text = currency.isoCode
-                fullNameTextView.text = currency.fullName
+                fullNameTextView.text = currency.fullName.capitalizeWords()
 
                 GlideApp.with(view)
                     .load(currency.flagImageUrl)
@@ -120,13 +125,16 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
                 rateEditText.apply {
                     if (currency.canChangeDisplayedRate) {
-                        setText(currency.getFormattedRateBasedOnEuro(currentRateMultiplier))
+                        setText(currency.getFormattedDisplayableRateBasedOnEuro())
                     } else {
                         setText(getCachedFormattedRateForCurrency(currency))
                     }
                     setOnTouchListener { _, _ ->
                         view.performClick()
                         true
+                    }
+                    addTextChangedListener { newText ->
+                        currency.enteredValue = newText.toDoubleOrNull() ?: 0.toDouble()
                     }
                 }
             }

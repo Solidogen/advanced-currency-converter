@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.util.state.Result
@@ -20,9 +21,7 @@ class MainActivity : AppCompatActivity() {
 /*
 TODO
     create conversion app kotlin:
-    calculate all rates based on first rate multiplier
-    ui perfect
-    lots of tests
+    lots of tests + inject schedulers for testing
 */
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
@@ -67,8 +66,7 @@ TODO
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
-            // todo commented for testing, uncomment when done debugging
-//            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
