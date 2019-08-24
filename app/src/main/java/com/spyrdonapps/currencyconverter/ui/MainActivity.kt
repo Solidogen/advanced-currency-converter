@@ -2,42 +2,30 @@ package com.spyrdonapps.currencyconverter.ui
 
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.Currency
+import com.spyrdonapps.currencyconverter.ui.base.BaseActivity
 import com.spyrdonapps.currencyconverter.util.extensions.hideKeyboard
 import com.spyrdonapps.currencyconverter.util.state.Result
-import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
-import javax.inject.Inject
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity<MainViewModel>() {
+
+    override val layoutId = R.layout.activity_main
+    override val viewModelType = MainViewModel::class.java
 
     private val currenciesAdapter = CurrenciesAdapter()
     private var layoutManagerInstanceState: Parcelable? = null
 
-    private val viewModel: MainViewModel by lazy {
-        ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
-    }
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         setupToolbar()
         setupRecyclerView()
-        initializeViewModel()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
-        observeViewModel()
     }
 
     override fun onStop() {
@@ -49,13 +37,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setTitle(R.string.toolbar_text)
     }
 
-    private fun initializeViewModel() {
-        if (!viewModel.isViewModelInitialized) {
-            viewModel.initialize()
-        }
-    }
-
-    private fun observeViewModel() {
+    override fun observeViewModel() {
         viewModel.currenciesLiveData.observe(this, Observer {
             handleCurrenciesState(it)
         })
