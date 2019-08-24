@@ -47,7 +47,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
         when (result) {
             is Result.Success -> showList(result.data)
             Result.Loading -> showLoading()
-            is Result.Error -> showError(result.data)
+            is Result.Error -> showError(result.fallbackData)
         }
     }
 

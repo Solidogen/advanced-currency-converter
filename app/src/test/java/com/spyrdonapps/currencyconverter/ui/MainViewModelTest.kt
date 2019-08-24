@@ -91,20 +91,6 @@ class MainViewModelTest {
         }
     }
 
-    // TODO sometimes returns correct data, some race conditions occur
-//    @Test
-//    fun mainViewModel_remoteDataAvailable_currenciesLiveDataHadSuccessStateWithCorrectData() {
-//        runBlockingTest {
-//            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
-//            delay(1000)
-//        }
-//        argumentCaptor<Result<List<Currency>>>().run {
-//            verify(observer, times(2)).onChanged(capture())
-//
-//            assertThat(lastValue, `is`(Result.Success(CurrenciesTestData.currencies) as Result<List<Currency>>))
-//        }
-//    }
-
     // region helper methods
 
     // endregion helper methods
