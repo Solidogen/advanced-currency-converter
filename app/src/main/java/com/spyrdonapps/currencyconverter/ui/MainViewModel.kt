@@ -73,7 +73,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     }
 
     /*
-    * Doesn't block calling function
+    * launch doesn't block calling function
     * */
     private fun launchOnMainTest(caller: CallerMethod = callerMethod) {
         log(caller, "$timeNow starting executing corou")
@@ -85,13 +85,11 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     }
 
     /*
-    * BLOCKS calling function
+    * runBlocking blocks calling function
     *
-    * runBlocking is blocking coroutine scope, different than scope defined in viewmodel
+    * it defines it's own BlockingCoroutineScope, no need to provide any scope
     *
-    * scope.launch doesn't block thread, runBlocking does
-    *
-    * RunBlocking is designed to be called from places where there are no coroutines yet, where we can block the thread
+    * runBlocking is designed to be called from places where there are no coroutines yet, where we are able to block the thread
     * */
     private fun launchOnMainBlockingTest(caller: CallerMethod = callerMethod) {
         runBlocking {
@@ -100,12 +98,13 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
                 delay(1000)
                 log(caller, "$timeNow Finished executing corou")
             }
+            log(caller, "$timeNow main thread continues instantly after launch")
         }
         log(caller, "$timeNow main thread continues after runBlocking coroutine finishes")
     }
 
     /*
-    * Launch doesn't block calling function, but withContext blocks scope where is was launched
+    * withContext blocks scope where is was launched
     * */
     private fun withContextIoTest(caller: CallerMethod = callerMethod) {
         scope.launch {
@@ -114,26 +113,23 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
                 delay(1000)
                 log(caller, "$timeNow Finished executing corou")
             }
-            log(caller, "$timeNow coroutine finishes, back to scope where withContext was called")
+            log(caller, "$timeNow withContext coroutine finishes, back to scope where withContext was called")
         }
         log(caller, "$timeNow main thread continues instantly after launch")
     }
 
     /*
-    * Launch doesn't block calling function, but withContext blocks scope where is was launched
+    * withContext blocks scope where is was launched
     *
     * No difference from withContextIoTest, withContext just forces caller to be a CoroutineScope
     * */
     private suspend fun withContextIoSuspendTest(caller: CallerMethod = callerMethod) {
-        scope.launch {
-            log(caller, "$timeNow starting executing corou")
-            withContext(Dispatchers.IO) {
-                delay(1000)
-                log(caller, "$timeNow Finished executing corou")
-            }
-            log(caller, "$timeNow coroutine finishes, back to scope where withContext was called")
+        log(caller, "$timeNow starting executing corou")
+        withContext(Dispatchers.IO) {
+            delay(1000)
+            log(caller, "$timeNow Finished executing corou")
         }
-        log(caller, "$timeNow main thread continues instantly after launch")
+        log(caller, "$timeNow withContext coroutine finishes, back to scope where withContext was called")
     }
 
     /*
@@ -146,6 +142,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
                 delay(1000)
                 log(caller, "$timeNow Finished executing corou")
             }
+            log(caller, "$timeNow withContext coroutine finishes, back to scope where withContext was called")
         }
         log(caller, "$timeNow main thread continues after runBlocking coroutine finishes")
     }
