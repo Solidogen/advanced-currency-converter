@@ -3,6 +3,7 @@ package com.spyrdonapps.currencyconverter
 import android.app.Activity
 import android.app.Application
 import com.spyrdonapps.currencyconverter.di.components.DaggerMyAppComponent
+import com.spyrdonapps.currencyconverter.util.coroutineDebugTree
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
 import timber.log.Timber
@@ -23,12 +24,7 @@ class MyApp : Application(), HasActivityInjector {
 
     private fun initTimber() {
         if (BuildConfig.DEBUG) {
-            Timber.plant(object : Timber.Tree() {
-
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    System.err.println("$tag; $message; thread: ${Thread.currentThread().name}")
-                }
-            })
+            Timber.plant(coroutineDebugTree)
         }
     }
 }

@@ -15,27 +15,7 @@ import java.util.Locale
 
 class CoroutineManager(private val scope: CoroutineScope) {
 
-    private val timeNow: String
-        get() = SimpleDateFormat("hh:mm:ss:SSS", Locale.ROOT).format(Date())
-
-    data class CallerMethod(val name: String, val codeLine: Int)
-
-    private val callerMethod: CallerMethod
-        get() {
-            val stackTraceElement = Thread.currentThread().stackTrace
-                .first { stackTraceElement ->
-                    !arrayOf("stacktrace", "callermethod", "invoke", "print")
-                        .toList()
-                        .any {
-                            stackTraceElement.methodName.toLowerCase(Locale.ROOT).contains(it)
-                        }
-                }
-            return CallerMethod(stackTraceElement.methodName.removeSuffix("\$default"), stackTraceElement.lineNumber)
-        }
-
-    private fun log(callerMethod: CallerMethod, str: String) {
-        Timber.tag("${callerMethod.name} ${callerMethod.codeLine}").e(str)
-    }
+    // TODO try async await as well
 
     init {
         launchOnMainTest()
@@ -130,17 +110,6 @@ class CoroutineManager(private val scope: CoroutineScope) {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
     private fun callbackTest(caller: CallerMethod = callerMethod) {
         // CALLBACKS
 /*      2019-08-24 13:47:48.171 16219-16219 W/System.err: callbacktest;, WAIT AND NOTIFY: WILL START; thread: main
@@ -163,5 +132,33 @@ class CoroutineManager(private val scope: CoroutineScope) {
                 onFinish()
             }
         }.start()
+    }
+}
+
+private val timeNow: String
+    get() = SimpleDateFormat("hh:mm:ss:SSS", Locale.ROOT).format(Date())
+
+data class CallerMethod(val name: String, val codeLine: Int)
+
+private val callerMethod: CallerMethod
+    get() {
+        val stackTraceElement = Thread.currentThread().stackTrace
+            .first { stackTraceElement ->
+                !arrayOf("stacktrace", "callermethod", "invoke", "print")
+                    .toList()
+                    .any {
+                        stackTraceElement.methodName.toLowerCase(Locale.ROOT).contains(it)
+                    }
+            }
+        return CallerMethod(stackTraceElement.methodName.removeSuffix("\$default"), stackTraceElement.lineNumber)
+    }
+
+private fun log(callerMethod: CallerMethod, str: String) {
+    Timber.tag("${callerMethod.name} ${callerMethod.codeLine}").e(str)
+}
+
+val coroutineDebugTree = object : Timber.Tree() {
+    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+        System.err.println("$tag; $message; thread: ${Thread.currentThread().name}")
     }
 }
