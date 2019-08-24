@@ -25,6 +25,10 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
 
     init {
         loadData()
+
+        waitAndNotify(onFinish = {
+            Timber.e("WAIT AND NOTIFY: FINISHED")
+        })
     }
 
     private fun loadData() {
@@ -67,5 +71,11 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
 
     companion object {
         const val INTERVAL_CHECK_PERIOD_MS = 1000L
+    }
+
+    fun waitAndNotify(onFinish: () -> Unit) {
+        Timber.e("WAIT AND NOTIFY: STARTED")
+        Thread.sleep(2000)
+        onFinish()
     }
 }
