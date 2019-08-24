@@ -53,6 +53,8 @@ class MainViewModelTest {
         Dispatchers.resetMain()
     }
 
+    // TODO MAKE LOAD DATA PUBLIC? but it will kill the flow, think about it
+
     // TODO sometimes returns correct data, some race conditions occur
     @Test
     fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
