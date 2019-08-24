@@ -59,6 +59,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                             it.setDisplayableValueBasedOnFirstCurrency(firstCurrency)
                         }
                     }
+                // TODO check if I can spare this item changed callback and just change edittext value without redrawing
                 currencies.filter { it.canChangeDisplayedRate }
                     .forEach {
                         notifyItemChanged(currencies.indexOf(it))
