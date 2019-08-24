@@ -1,5 +1,7 @@
 package com.spyrdonapps.currencyconverter.ui
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,9 +28,16 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     init {
         loadData()
 
-        waitAndNotify(onFinish = {
-            Timber.e("WAIT AND NOTIFY: FINISHED")
+        // CALLBACKS
+/*      2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: WILL START, Thread[main,5,main]
+        2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: THREAD CONTINUES, thread: Thread[main,5,main]
+        2019-08-24 11:55:24.181 9068-9105/com.spyrdonapps.currencyconverter E/MainViewModel$doOnBackgroundAndNotifyListeners: WAIT AND NOTIFY: EXECUTING, Thread[Thread-6,5,main]
+        2019-08-24 11:55:26.182 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: FINISHED: Thread[main,5,main]*/
+
+        doOnBackgroundAndNotifyListeners(onFinish = {
+            Timber.e("WAIT AND NOTIFY: FINISHED: ${Thread.currentThread()}")
         })
+        Timber.e("THREAD CONTINUES, thread: ${Thread.currentThread()}")
     }
 
     private fun loadData() {
@@ -73,9 +82,14 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         const val INTERVAL_CHECK_PERIOD_MS = 1000L
     }
 
-    fun waitAndNotify(onFinish: () -> Unit) {
-        Timber.e("WAIT AND NOTIFY: STARTED")
-        Thread.sleep(2000)
-        onFinish()
+    fun doOnBackgroundAndNotifyListeners(onFinish: () -> Unit) {
+        Timber.e("WAIT AND NOTIFY: WILL START, ${Thread.currentThread()}")
+        Thread {
+            Timber.e("WAIT AND NOTIFY: EXECUTING, ${Thread.currentThread()}")
+            Thread.sleep(2000)
+            Handler(Looper.getMainLooper()).post {
+                onFinish()
+            }
+        }.start()
     }
 }
