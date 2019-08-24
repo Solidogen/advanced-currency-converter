@@ -32,9 +32,15 @@ class MainViewModelTest {
 
     // region helper fields
 
+    /*
+    * Forces LiveData to immediately post values to main-like thread
+    * */
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
+    /*
+    * Lets coroutine delay() function progress immediately
+    * */
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val mockCurrencyRepository: CurrencyRepository = mock()
@@ -54,6 +60,7 @@ class MainViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -80,7 +87,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
+    fun `mainViewModel, remote data not available and cached data is empty, currenciesLiveData had error state`() {
         runBlocking {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { emptyList<List<Currency>>() }
@@ -90,6 +97,20 @@ class MainViewModelTest {
             }
         }
     }
+
+    @Test
+    fun `mainViewModel, remote data not available and getting cached data throws exception, currenciesLiveData had error state`() {
+        runBlocking {
+            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
+            `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { throw ioException }
+            classUnderTest.currenciesLiveData.captureValues {
+                classUnderTest.initialize()
+                assertSendsValues(2000, Result.Loading, Result.Error(ioException))
+            }
+        }
+    }
+
+    // TODO interval test? then test repository I guess?
 
     // region helper methods
 
