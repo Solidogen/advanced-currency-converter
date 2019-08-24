@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(private val currencyRepository: CurrencyRepository) : ViewModel() {
@@ -30,17 +31,26 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
 
     // region testing
     private val timeNow: String
-        get() = SimpleDateFormat("hh:mm:ss:SSS").format(Date())
+        get() = SimpleDateFormat("hh:mm:ss:SSS", Locale.ROOT).format(Date())
 
-    private val callerMethod: String
+    data class CallerMethod(val name: String)
+
+    private val callerMethod: CallerMethod
         get() {
-            val methodNames = Thread.currentThread().stackTrace.map { it.methodName }
-            return methodNames.first {
-                !it.toLowerCase().contains("stacktrace")
-                        && !it.toLowerCase().contains("callermethod")
-                        && !it.toLowerCase().contains("invokesuspend")}
+            return CallerMethod(Thread.currentThread().stackTrace
+                .map { it.methodName.toLowerCase(Locale.ROOT).removeSuffix("\$default") }.first { methodName ->
+                    !arrayOf(
+                        "stacktrace",
+                        "callermethod",
+                        "invoke",
+                        "print"
+                    ).toList().any { methodName.contains(it) }
+                })
         }
-    // endregion
+
+    private fun log(callerMethod: CallerMethod, str: String) {
+        Timber.tag(callerMethod.name).e(str)
+    }
 
     init {
         loadData()
@@ -50,27 +60,40 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         callbackTest()
     }
 
-    private fun launchOnMainTest() {
-        val thisMethod = callerMethod
+    private fun launchOnMainTest(caller: CallerMethod = callerMethod) {
         scope.launch {
             delay(1000)
-            Timber.tag(thisMethod).e("$timeNow finished executing corou")
+            log(caller, "$timeNow finished executing corou")
         }
-        Timber.tag(thisMethod).e("$timeNow main thread continues instantly")
+        log(caller, "$timeNow main thread continues instantly")
     }
 
-    private fun callbackTest() {
+    private fun callbackTest(caller: CallerMethod = callerMethod) {
+        Thread.sleep(2000)
         // CALLBACKS
 /*      2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: WILL START, Thread[main,5,main]
         2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: THREAD CONTINUES, thread: Thread[main,5,main]
         2019-08-24 11:55:24.181 9068-9105/com.spyrdonapps.currencyconverter E/MainViewModel$doOnBackgroundAndNotifyListeners: WAIT AND NOTIFY: EXECUTING, Thread[Thread-6,5,main]
         2019-08-24 11:55:26.182 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: FINISHED: Thread[main,5,main]*/
 
-//        doOnBackgroundAndNotifyListeners(onFinish = {
-//            Timber.e("WAIT AND NOTIFY: FINISHED: ${Thread.currentThread()}")
-//        })
-//        Timber.e("THREAD CONTINUES, thread: ${Thread.currentThread()}")
+        doOnBackgroundAndNotifyListeners(caller, onFinish = {
+            log(caller, "WAIT AND NOTIFY: FINISHED")
+        })
+        log(caller, "THREAD CONTINUES")
     }
+
+    private fun doOnBackgroundAndNotifyListeners(caller: CallerMethod, onFinish: () -> Unit) {
+        log(caller, "WAIT AND NOTIFY: WILL START, ${Thread.currentThread()}")
+        Thread {
+            log(caller, "WAIT AND NOTIFY: EXECUTING, ${Thread.currentThread()}")
+            Thread.sleep(2000)
+            Handler(Looper.getMainLooper()).post {
+                onFinish()
+            }
+        }.start()
+    }
+
+    // endregion
 
     private fun loadData() {
         _currenciesLiveData.postValue(Result.Loading)
@@ -112,16 +135,5 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
 
     companion object {
         const val INTERVAL_CHECK_PERIOD_MS = 1000L
-    }
-
-    fun doOnBackgroundAndNotifyListeners(onFinish: () -> Unit) {
-        Timber.e("WAIT AND NOTIFY: WILL START, ${Thread.currentThread()}")
-        Thread {
-            Timber.e("WAIT AND NOTIFY: EXECUTING, ${Thread.currentThread()}")
-            Thread.sleep(2000)
-            Handler(Looper.getMainLooper()).post {
-                onFinish()
-            }
-        }.start()
     }
 }
