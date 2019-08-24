@@ -52,17 +52,30 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     init {
         loadData()
 
-//        launchOnMainTest()
+        launchOnMainTest()
+        withContextIoTest()
 
-        callbackTest()
+//        callbackTest()
     }
 
     private fun launchOnMainTest(caller: CallerMethod = callerMethod) {
+        log(caller, "$timeNow starting executing corou")
         scope.launch {
-            delay(1000)
-            log(caller, "$timeNow finished executing corou")
+            delay(1000) // when another coroutine with runBlocking (?) also makes delay, that delay is added to this delay (what)
+            log(caller, "$timeNow Finished executing corou")
         }
         log(caller, "$timeNow main thread continues instantly")
+    }
+
+    private fun withContextIoTest(caller: CallerMethod = callerMethod) {
+        runBlocking {
+            log(caller, "$timeNow starting executing corou")
+            withContext(Dispatchers.IO) {
+                delay(1000)
+                log(caller, "$timeNow Finished executing corou")
+            }
+            log(caller, "$timeNow main thread continues after coroutine finishes")
+        }
     }
 
     private fun callbackTest(caller: CallerMethod = callerMethod) {
@@ -73,9 +86,9 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         2019-08-24 13:47:50.174 16219-16219 W/System.err: callbacktest;, WAIT AND NOTIFY: FINISHED; thread: main*/
 
         doOnBackgroundAndNotifyListeners(caller, onFinish = {
-            log(caller, "WAIT AND NOTIFY - FINISHED")
+            log(caller, "WAIT AND NOTIFY - FINISHED CALLBACK")
         })
-        log(caller, "THREAD CONTINUES")
+        log(caller, "THREAD CONTINUES INSTANTLY")
     }
 
     private fun doOnBackgroundAndNotifyListeners(caller: CallerMethod, onFinish: () -> Unit) {
