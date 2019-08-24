@@ -12,7 +12,6 @@ import com.spyrdonapps.currencyconverter.util.state.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -52,8 +51,11 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     init {
         loadData()
 
-        launchOnMainTest()
+//        launchOnMainTest()
+//        launchOnMainBlockingTest()
+
         withContextIoTest()
+//        withContextIoBlockingTest()
 
 //        callbackTest()
     }
@@ -67,15 +69,47 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         log(caller, "$timeNow main thread continues instantly")
     }
 
+    /*
+    * runBlocking is blocking coroutine scope, different than scope defined in viewmodel
+    *
+    * scope.launch doesn't block thread, runBlocking does (?)
+    *
+    * this lets coroutine finish before
+    * */
+    private fun launchOnMainBlockingTest(caller: CallerMethod = callerMethod) {
+        runBlocking {
+            log(caller, "$timeNow starting executing corou")
+            launch {
+                delay(1000)
+                log(caller, "$timeNow Finished executing corou")
+            }
+        }
+        log(caller, "$timeNow main thread continues after coroutine finishes")
+    }
+
+    /*
+    * thread continues instantly (I would think that is "blocks" but it's not a suspending function)
+    * */
     private fun withContextIoTest(caller: CallerMethod = callerMethod) {
+        scope.launch {
+            log(caller, "$timeNow starting executing corou")
+            withContext(Dispatchers.IO) {
+                delay(1000)
+                log(caller, "$timeNow Finished executing corou")
+            }
+        }
+        log(caller, "$timeNow main thread continues instantly")
+    }
+
+    private fun withContextIoBlockingTest(caller: CallerMethod = callerMethod) {
         runBlocking {
             log(caller, "$timeNow starting executing corou")
             withContext(Dispatchers.IO) {
                 delay(1000)
                 log(caller, "$timeNow Finished executing corou")
             }
-            log(caller, "$timeNow main thread continues after coroutine finishes")
         }
+        log(caller, "$timeNow main thread continues after coroutine finishes")
     }
 
     private fun callbackTest(caller: CallerMethod = callerMethod) {
