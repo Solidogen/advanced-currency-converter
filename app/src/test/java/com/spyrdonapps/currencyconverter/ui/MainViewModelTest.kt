@@ -8,6 +8,7 @@ import com.spyrdonapps.currencyconverter.test.util.InstantTaskExecutorRule
 import com.spyrdonapps.currencyconverter.test.util.captureValues
 import com.spyrdonapps.currencyconverter.util.state.Result
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
@@ -38,6 +39,8 @@ class MainViewModelTest {
 
     private val mockCurrencyRepository: CurrencyRepository = mock()
 
+    private val ioException = IOException()
+
     // endregion helper fields
 
     private lateinit var classUnderTest: MainViewModel
@@ -53,17 +56,15 @@ class MainViewModelTest {
         Dispatchers.resetMain()
     }
 
-    // TODO MAKE LOAD DATA PUBLIC? but it will kill the flow, think about it
-
     // TODO sometimes returns correct data, some race conditions occur
     @Test
     fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
-        runBlockingTest {
-            val exception = IOException()
-            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw exception }
+        runBlocking {
+            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { emptyList<List<Currency>>() }
             classUnderTest.currenciesLiveData.captureValues {
-                assertSendsValues(2000, Result.Loading, Result.Error(exception))
+                classUnderTest.initialize()
+                assertSendsValues(2000, Result.Loading, Result.Error(ioException))
             }
         }
     }
@@ -72,9 +73,10 @@ class MainViewModelTest {
     // Also works when viewmodel is created right in arrange of this test
     @Test
     fun `mainViewModel, remote data available, currenciesLiveData had success state with correct data`() {
-        runBlockingTest {
+        runBlocking {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
             classUnderTest.currenciesLiveData.captureValues {
+                classUnderTest.initialize()
                 assertSendsValues(2000, Result.Loading, Result.Success(CurrenciesTestData.currencies))
             }
         }

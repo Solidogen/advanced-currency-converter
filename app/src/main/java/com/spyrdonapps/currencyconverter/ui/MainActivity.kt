@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setupToolbar()
         setupRecyclerView()
+        initializeViewModel()
         handleSavedInstanceStateIfNeeded(savedInstanceState)
         observeViewModel()
     }
@@ -46,6 +47,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         supportActionBar?.setTitle(R.string.toolbar_text)
+    }
+
+    private fun initializeViewModel() {
+        if (!viewModel.isViewModelInitialized) {
+            viewModel.initialize()
+        }
     }
 
     private fun observeViewModel() {

@@ -17,14 +17,18 @@ import javax.inject.Inject
 
 class MainViewModel @Inject constructor(private val currencyRepository: CurrencyRepository) : ViewModel() {
 
+    var isViewModelInitialized = false
+        private set
+
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Main)
 
     private val _currenciesLiveData: MutableLiveData<Result<List<Currency>>> = MutableLiveData()
     val currenciesLiveData: LiveData<Result<List<Currency>>> = _currenciesLiveData
 
-    init {
+    fun initialize() {
         loadData()
+        isViewModelInitialized = true
     }
 
     private fun loadData() {
