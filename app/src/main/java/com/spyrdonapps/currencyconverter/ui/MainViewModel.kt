@@ -28,12 +28,11 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     private val _currenciesLiveData: MutableLiveData<Result<List<Currency>>> = MutableLiveData()
     val currenciesLiveData: LiveData<Result<List<Currency>>> = _currenciesLiveData
 
-    val timeNow: String
+    // region testing
+    private val timeNow: String
         get() = SimpleDateFormat("hh:mm:ss:SSS").format(Date())
 
-    val tag = "MVM"
-
-    val callerMethod: String
+    private val callerMethod: String
         get() {
             val methodNames = Thread.currentThread().stackTrace.map { it.methodName }
             return methodNames.first {
@@ -41,6 +40,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
                         && !it.toLowerCase().contains("callermethod")
                         && !it.toLowerCase().contains("invokesuspend")}
         }
+    // endregion
 
     init {
         loadData()
