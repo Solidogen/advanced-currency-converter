@@ -26,7 +26,7 @@ class MyApp : Application(), HasActivityInjector {
             Timber.plant(object : Timber.Tree() {
 
                 override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    System.err.println("$tag;, $message; thread: ${Thread.currentThread().name}")
+                    System.err.println("$tag; $message; thread: ${Thread.currentThread().name}")
                 }
             })
         }

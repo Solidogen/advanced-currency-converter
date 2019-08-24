@@ -12,8 +12,10 @@ import com.spyrdonapps.currencyconverter.util.state.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -39,12 +41,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         get() {
             return CallerMethod(Thread.currentThread().stackTrace
                 .map { it.methodName.toLowerCase(Locale.ROOT).removeSuffix("\$default") }.first { methodName ->
-                    !arrayOf(
-                        "stacktrace",
-                        "callermethod",
-                        "invoke",
-                        "print"
-                    ).toList().any { methodName.contains(it) }
+                    !arrayOf("stacktrace", "callermethod", "invoke", "print").toList().any { methodName.contains(it) }
                 })
         }
 
@@ -55,7 +52,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     init {
         loadData()
 
-        launchOnMainTest()
+//        launchOnMainTest()
 
         callbackTest()
     }
@@ -69,23 +66,22 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     }
 
     private fun callbackTest(caller: CallerMethod = callerMethod) {
-        Thread.sleep(2000)
         // CALLBACKS
-/*      2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: WILL START, Thread[main,5,main]
-        2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: THREAD CONTINUES, thread: Thread[main,5,main]
-        2019-08-24 11:55:24.181 9068-9105/com.spyrdonapps.currencyconverter E/MainViewModel$doOnBackgroundAndNotifyListeners: WAIT AND NOTIFY: EXECUTING, Thread[Thread-6,5,main]
-        2019-08-24 11:55:26.182 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: FINISHED: Thread[main,5,main]*/
+/*      2019-08-24 13:47:48.171 16219-16219 W/System.err: callbacktest;, WAIT AND NOTIFY: WILL START; thread: main
+        2019-08-24 13:47:48.172 16219-16219 W/System.err: callbacktest;, THREAD CONTINUES; thread: main
+        2019-08-24 13:47:48.172 16219-16258 W/System.err: callbacktest;, WAIT AND NOTIFY: EXECUTING; thread: Thread-7
+        2019-08-24 13:47:50.174 16219-16219 W/System.err: callbacktest;, WAIT AND NOTIFY: FINISHED; thread: main*/
 
         doOnBackgroundAndNotifyListeners(caller, onFinish = {
-            log(caller, "WAIT AND NOTIFY: FINISHED")
+            log(caller, "WAIT AND NOTIFY - FINISHED")
         })
         log(caller, "THREAD CONTINUES")
     }
 
     private fun doOnBackgroundAndNotifyListeners(caller: CallerMethod, onFinish: () -> Unit) {
-        log(caller, "WAIT AND NOTIFY: WILL START, ${Thread.currentThread()}")
+        log(caller, "WAIT AND NOTIFY - WILL START")
         Thread {
-            log(caller, "WAIT AND NOTIFY: EXECUTING, ${Thread.currentThread()}")
+            log(caller, "WAIT AND NOTIFY - EXECUTING")
             Thread.sleep(2000)
             Handler(Looper.getMainLooper()).post {
                 onFinish()
