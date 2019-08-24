@@ -56,7 +56,29 @@ class MainViewModelTest {
         Dispatchers.resetMain()
     }
 
-    // TODO sometimes returns correct data, some race conditions occur
+    @Test
+    fun `mainViewModel, remote data available, currenciesLiveData had success state with correct data`() {
+        runBlocking {
+            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
+            classUnderTest.currenciesLiveData.captureValues {
+                classUnderTest.initialize()
+                assertSendsValues(2000, Result.Loading, Result.Success(CurrenciesTestData.currencies))
+            }
+        }
+    }
+
+    @Test
+    fun `mainViewModel, remote data not available and cached data available, currenciesLiveData had error state with data from cache`() {
+        runBlocking {
+            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
+            `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { CurrenciesTestData.currencies }
+            classUnderTest.currenciesLiveData.captureValues {
+                classUnderTest.initialize()
+                assertSendsValues(2000, Result.Loading, Result.Error(ioException, CurrenciesTestData.currencies))
+            }
+        }
+    }
+
     @Test
     fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
         runBlocking {
@@ -65,19 +87,6 @@ class MainViewModelTest {
             classUnderTest.currenciesLiveData.captureValues {
                 classUnderTest.initialize()
                 assertSendsValues(2000, Result.Loading, Result.Error(ioException))
-            }
-        }
-    }
-
-    // TODO sometimes returns correct data, some race conditions occur
-    // Also works when viewmodel is created right in arrange of this test
-    @Test
-    fun `mainViewModel, remote data available, currenciesLiveData had success state with correct data`() {
-        runBlocking {
-            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
-            classUnderTest.currenciesLiveData.captureValues {
-                classUnderTest.initialize()
-                assertSendsValues(2000, Result.Loading, Result.Success(CurrenciesTestData.currencies))
             }
         }
     }
