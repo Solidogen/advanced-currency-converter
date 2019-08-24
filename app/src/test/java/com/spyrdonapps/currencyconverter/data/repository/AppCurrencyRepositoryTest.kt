@@ -1,30 +1,25 @@
 package com.spyrdonapps.currencyconverter.data.repository
 
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.spyrdonapps.currencyconverter.data.local.CurrencyDao
 import com.spyrdonapps.currencyconverter.data.model.Currency
-import com.spyrdonapps.currencyconverter.data.remote.ApiCurrencies
-import com.spyrdonapps.currencyconverter.data.remote.CurrenciesResponse
 import com.spyrdonapps.currencyconverter.data.remote.CurrencyService
 import com.spyrdonapps.currencyconverter.test.data.CurrenciesTestData
-import com.spyrdonapps.currencyconverter.test.data.TestExceptions
 import com.spyrdonapps.currencyconverter.test.data.TestExceptions.ioException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import org.hamcrest.CoreMatchers.`is`
+import org.junit.After
+import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
-
-import org.hamcrest.CoreMatchers.*
-import org.junit.After
-import org.junit.Assert.*
-import org.mockito.ArgumentMatchers.*
-import org.mockito.Mockito.*
 import java.io.IOException
 
 
@@ -64,6 +59,15 @@ class AppCurrencyRepositoryTest {
             `when`(mockCurrencyService.getCurrenciesResponse()).thenAnswer { CurrenciesTestData.currenciesResponse }
             val currencies = classUnderTest.getCurrenciesFromRemote()
             assertThat(currencies, `is`(CurrenciesTestData.currencies))
+        }
+    }
+
+    @Test
+    fun `currencyRepository getCurrenciesFromRemote, remote data available, data is saved to cache`() {
+        runBlocking {
+            `when`(mockCurrencyService.getCurrenciesResponse()).thenAnswer { CurrenciesTestData.currenciesResponse }
+            classUnderTest.getCurrenciesFromRemote()
+            verify(mockCurrencyDao).saveCurrencies(CurrenciesTestData.currencies)
         }
     }
 
