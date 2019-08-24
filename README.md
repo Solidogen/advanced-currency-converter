@@ -12,4 +12,4 @@ Android app for showing updated currency rates every second and recalculate all 
 * Unit/UI tests
 * Offline mode
 * Rotation recycler state saving
-* Recycler item moving
+* Recycler item animations
