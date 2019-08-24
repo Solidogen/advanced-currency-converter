@@ -1,10 +1,8 @@
 package com.spyrdonapps.currencyconverter.ui
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +18,8 @@ import timber.log.Timber
 import java.util.Collections
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
+
+    // TODO scrolling after putting value from keyboard makes unexpected behaviors, unit test it
 
     private lateinit var recyclerView: RecyclerView
     private var currencies: MutableList<Currency> = mutableListOf()

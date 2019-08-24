@@ -3,6 +3,7 @@ package com.spyrdonapps.currencyconverter.ui
 import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.spyrdonapps.currencyconverter.data.model.Currency
@@ -10,8 +11,13 @@ import com.spyrdonapps.currencyconverter.data.repository.CurrencyRepository
 import com.spyrdonapps.currencyconverter.test.data.CurrenciesTestData
 import com.spyrdonapps.currencyconverter.test.util.InstantTaskExecutorRule
 import com.spyrdonapps.currencyconverter.util.state.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.instanceOf
 import org.junit.After
 import org.junit.Assert.assertThat
 import org.junit.Before
@@ -23,10 +29,11 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 import java.io.IOException
 
 
-@RunWith(JUnit4::class)
+@RunWith(MockitoJUnitRunner::class)
 class MainViewModelTest {
 
     // region constants
@@ -38,8 +45,11 @@ class MainViewModelTest {
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
+    private val testDispatcher = TestCoroutineDispatcher()
+
     private val mockCurrencyRepository: CurrencyRepository = mock()
-    private val observer: Observer<Result<List<Currency>>> = mock()
+
+    private var observer: Observer<Result<List<Currency>>> = mock()
 
     // endregion helper fields
 
@@ -47,35 +57,40 @@ class MainViewModelTest {
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
+        Dispatchers.setMain(testDispatcher)
         classUnderTest = MainViewModel(mockCurrencyRepository)
         classUnderTest.currenciesLiveData.observeForever(observer)
     }
 
-    // todo doesn't work
-//    @After
-//    fun tearDown() {
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
 //        reset(observer, mockCurrencyRepository)
 //        classUnderTest.currenciesLiveData.removeObserver(observer)
-//    }
-
-    @Test
-    fun mainViewModel_currenciesLiveDataHadDataLoadingStatePosted() {
-        verify(observer).onChanged(Result.Loading)
     }
 
-    // TODO works if test runs alone, doesn't work when ran in bulk
+    // TODO always works when ran alone, always fails when testing whole class, some race conditions occur
+    @Test
+    fun mainViewModel_currenciesLiveDataHadDataLoadingStatePosted() {
+        argumentCaptor<Result<List<Currency>>>().run {
+            verify(observer, times(2)).onChanged(capture())
+
+            assertThat(firstValue, `is`(instanceOf(Result.Loading::class.java)))
+        }
+    }
+
+    // TODO sometimes returns correct data, some race conditions occur
     // Also works when viewmodel is created right in arrange of this test
     @Test
     fun mainViewModel_currenciesLiveDataInteractedTwice() {
         verify(observer, times(2)).onChanged(any())
     }
 
-    // TODO repo returns default value of Success(null)
+    // TODO sometimes returns correct data, some race conditions occur
     @Test
     fun mainViewModel_remoteDataAvailable_currenciesLiveDataHadSuccessStateWithCorrectData() {
         runBlockingTest {
-            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenReturn(CurrenciesTestData.currencies)
+            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
         }
         argumentCaptor<Result<List<Currency>>>().run {
             verify(observer, times(2)).onChanged(capture())
@@ -84,16 +99,18 @@ class MainViewModelTest {
         }
     }
 
-    // todo need to distinguish between error with and without cache, rewrite this. and doesn't work now
+    // TODO doesn't work now, TooLittleActualInvocations, some race conditions occur
     @Test
-    fun mainViewModel_remoteDataNotAvailable_currenciesLiveDataHadErrorState() {
+    fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
         runBlockingTest {
-            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenThrow(IOException())
+            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw IOException() }
+            `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { emptyList<List<Currency>>() }
         }
         argumentCaptor<Result<List<Currency>>>().run {
             verify(observer, times(2)).onChanged(capture())
 
-            assertThat(lastValue, `is`(Result.Error(IOException(), null) as Result<List<Currency>>))
+            assertThat(lastValue, `is`(instanceOf(Result.Error::class.java)))
+            assertThat((lastValue as Result.Error<List<Currency>>).data, isNull())
         }
     }
 
