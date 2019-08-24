@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.data.repository.CurrencyRepository
 import com.spyrdonapps.currencyconverter.test.data.CurrenciesTestData
+import com.spyrdonapps.currencyconverter.test.data.TestExceptions.ioException
 import com.spyrdonapps.currencyconverter.test.util.InstantTaskExecutorRule
 import com.spyrdonapps.currencyconverter.test.util.captureValues
 import com.spyrdonapps.currencyconverter.util.state.Result
@@ -11,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
@@ -20,7 +20,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
-import java.io.IOException
 
 
 @RunWith(MockitoJUnitRunner::class)
@@ -32,20 +31,12 @@ class MainViewModelTest {
 
     // region helper fields
 
-    /*
-    * Forces LiveData to immediately post values to main-like thread
-    * */
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    /*
-    * Lets coroutine delay() function progress immediately
-    * */
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val mockCurrencyRepository: CurrencyRepository = mock()
-
-    private val ioException = IOException()
 
     // endregion helper fields
 
@@ -69,7 +60,7 @@ class MainViewModelTest {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
             classUnderTest.currenciesLiveData.captureValues {
                 classUnderTest.initialize()
-                assertSendsValues(2000, Result.Loading, Result.Success(CurrenciesTestData.currencies))
+                assertSendsValues(100, Result.Loading, Result.Success(CurrenciesTestData.currencies))
             }
         }
     }
@@ -81,7 +72,7 @@ class MainViewModelTest {
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { CurrenciesTestData.currencies }
             classUnderTest.currenciesLiveData.captureValues {
                 classUnderTest.initialize()
-                assertSendsValues(2000, Result.Loading, Result.Error(ioException, CurrenciesTestData.currencies))
+                assertSendsValues(100, Result.Loading, Result.Error(ioException, CurrenciesTestData.currencies))
             }
         }
     }
@@ -93,7 +84,7 @@ class MainViewModelTest {
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { emptyList<List<Currency>>() }
             classUnderTest.currenciesLiveData.captureValues {
                 classUnderTest.initialize()
-                assertSendsValues(2000, Result.Loading, Result.Error(ioException))
+                assertSendsValues(100, Result.Loading, Result.Error(ioException))
             }
         }
     }
@@ -105,12 +96,10 @@ class MainViewModelTest {
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { throw ioException }
             classUnderTest.currenciesLiveData.captureValues {
                 classUnderTest.initialize()
-                assertSendsValues(2000, Result.Loading, Result.Error(ioException))
+                assertSendsValues(100, Result.Loading, Result.Error(ioException))
             }
         }
     }
-
-    // TODO interval test? then test repository I guess?
 
     // region helper methods
 
