@@ -33,6 +33,15 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
 
     val tag = "MVM"
 
+    val callerMethod: String
+        get() {
+            val methodNames = Thread.currentThread().stackTrace.map { it.methodName }
+            return methodNames.first {
+                !it.toLowerCase().contains("stacktrace")
+                        && !it.toLowerCase().contains("callermethod")
+                        && !it.toLowerCase().contains("invokesuspend")}
+        }
+
     init {
         loadData()
 
@@ -42,11 +51,12 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     }
 
     private fun launchOnMainTest() {
+        val thisMethod = callerMethod
         scope.launch {
             delay(1000)
-            Timber.tag(tag).e("$timeNow finished executing corou")
+            Timber.tag(thisMethod).e("$timeNow finished executing corou")
         }
-        Timber.tag(tag).e("$timeNow main thread continues instantly")
+        Timber.tag(thisMethod).e("$timeNow main thread continues instantly")
     }
 
     private fun callbackTest() {

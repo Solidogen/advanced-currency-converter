@@ -29,7 +29,7 @@ class MyApp : Application(), HasActivityInjector {
 
                 @SuppressLint("LogNotTimber")
                 override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    Log.e("APP", message)
+                    Log.e("APP.$tag", message)
                 }
             })
         }
