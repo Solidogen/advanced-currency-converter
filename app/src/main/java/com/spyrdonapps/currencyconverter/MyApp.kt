@@ -1,7 +1,9 @@
 package com.spyrdonapps.currencyconverter
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
+import android.util.Log
 import com.spyrdonapps.currencyconverter.di.components.DaggerMyAppComponent
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
@@ -23,7 +25,13 @@ class MyApp : Application(), HasActivityInjector {
 
     private fun initTimber() {
         if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
+            Timber.plant(object : Timber.Tree() {
+
+                @SuppressLint("LogNotTimber")
+                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                    Log.e("APP", message)
+                }
+            })
         }
     }
 }

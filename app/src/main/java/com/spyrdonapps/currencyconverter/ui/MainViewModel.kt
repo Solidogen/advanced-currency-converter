@@ -12,9 +12,12 @@ import com.spyrdonapps.currencyconverter.util.state.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(private val currencyRepository: CurrencyRepository) : ViewModel() {
@@ -25,19 +28,38 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     private val _currenciesLiveData: MutableLiveData<Result<List<Currency>>> = MutableLiveData()
     val currenciesLiveData: LiveData<Result<List<Currency>>> = _currenciesLiveData
 
+    val timeNow: String
+        get() = SimpleDateFormat("hh:mm:ss:SSS").format(Date())
+
+    val tag = "MVM"
+
     init {
         loadData()
 
+        launchOnMainTest()
+
+        callbackTest()
+    }
+
+    private fun launchOnMainTest() {
+        scope.launch {
+            delay(1000)
+            Timber.tag(tag).e("$timeNow finished executing corou")
+        }
+        Timber.tag(tag).e("$timeNow main thread continues instantly")
+    }
+
+    private fun callbackTest() {
         // CALLBACKS
 /*      2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: WILL START, Thread[main,5,main]
         2019-08-24 11:55:24.181 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: THREAD CONTINUES, thread: Thread[main,5,main]
         2019-08-24 11:55:24.181 9068-9105/com.spyrdonapps.currencyconverter E/MainViewModel$doOnBackgroundAndNotifyListeners: WAIT AND NOTIFY: EXECUTING, Thread[Thread-6,5,main]
         2019-08-24 11:55:26.182 9068-9068/com.spyrdonapps.currencyconverter E/MainViewModel: WAIT AND NOTIFY: FINISHED: Thread[main,5,main]*/
 
-        doOnBackgroundAndNotifyListeners(onFinish = {
-            Timber.e("WAIT AND NOTIFY: FINISHED: ${Thread.currentThread()}")
-        })
-        Timber.e("THREAD CONTINUES, thread: ${Thread.currentThread()}")
+//        doOnBackgroundAndNotifyListeners(onFinish = {
+//            Timber.e("WAIT AND NOTIFY: FINISHED: ${Thread.currentThread()}")
+//        })
+//        Timber.e("THREAD CONTINUES, thread: ${Thread.currentThread()}")
     }
 
     private fun loadData() {
