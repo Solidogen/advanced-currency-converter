@@ -1,5 +1,5 @@
 # Advanced Currency Converter
-Android app for showing updated currency rates every second and calculate all rates based on any of them
+Android app for showing updated currency rates every second and recalculate all rates based on user input in any currency
 
 ### Tech stack
 * MVVM architecture
@@ -9,6 +9,7 @@ Android app for showing updated currency rates every second and calculate all ra
 * Dagger
 
 ### Noticable things
+* Unit/UI tests
 * Offline mode
 * Rotation recycler state saving
 * Recycler item moving
