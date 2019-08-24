@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.data.repository.CurrencyRepository
 import com.spyrdonapps.currencyconverter.test.data.CurrenciesTestData
+import com.spyrdonapps.currencyconverter.test.data.TestExceptions.illegalArgumentException
 import com.spyrdonapps.currencyconverter.test.data.TestExceptions.ioException
 import com.spyrdonapps.currencyconverter.test.util.InstantTaskExecutorRule
 import com.spyrdonapps.currencyconverter.test.util.captureValues
@@ -78,25 +79,13 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `mainViewModel, remote data not available and cached data is empty, currenciesLiveData had error state`() {
+    fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
         runBlocking {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
-            `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { emptyList<List<Currency>>() }
+            `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { throw illegalArgumentException }
             classUnderTest.currenciesLiveData.captureValues {
                 classUnderTest.initialize()
-                assertSendsValues(100, Result.Loading, Result.Error(ioException))
-            }
-        }
-    }
-
-    @Test
-    fun `mainViewModel, remote data not available and getting cached data throws exception, currenciesLiveData had error state`() {
-        runBlocking {
-            `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
-            `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { throw ioException }
-            classUnderTest.currenciesLiveData.captureValues {
-                classUnderTest.initialize()
-                assertSendsValues(100, Result.Loading, Result.Error(ioException))
+                assertSendsValues(100, Result.Loading, Result.Error(illegalArgumentException))
             }
         }
     }

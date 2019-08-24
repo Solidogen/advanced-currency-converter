@@ -46,10 +46,10 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         }
     }
 
-    private suspend fun launchLoadDataFromCache(e: Exception) {
+    private suspend fun launchLoadDataFromCache(loadFromRemoteException: Exception) {
         try {
             currencyRepository.getCurrenciesFromCache().let { cachedCurrencies ->
-                _currenciesLiveData.postValue(Result.Error(e, cachedCurrencies.takeUnless { it.isEmpty() }))
+                _currenciesLiveData.postValue(Result.Error(loadFromRemoteException, cachedCurrencies))
             }
         } catch (e: Exception) {
             Timber.e(e)
