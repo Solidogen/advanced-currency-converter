@@ -54,8 +54,10 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
 //        launchOnMainTest()
 //        launchOnMainBlockingTest()
 
-        withContextIoTest()
+//        withContextIoTest()
 //        withContextIoBlockingTest()
+
+        callSuspendingWithContextIoTest()
 
 //        callbackTest()
     }
@@ -88,7 +90,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     }
 
     /*
-    * thread continues instantly (I would think that is "blocks" but it's not a suspending function)
+    * thread continues instantly (I would think that is "blocks" but it's not a suspending function, see 'callSuspendingWithContextIoTest')
     * */
     private fun withContextIoTest(caller: CallerMethod = callerMethod) {
         scope.launch {
@@ -112,6 +114,25 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         log(caller, "$timeNow main thread continues after coroutine finishes")
     }
 
+    /*
+    * thread is actually blocked because of 'suspend' keywork, otherwise it is the same as 'withContextIoTest'
+    * */
+    private fun callSuspendingWithContextIoTest(caller: CallerMethod = callerMethod) {
+
+        suspend fun method(caller: CallerMethod) {
+            log(caller, "$timeNow starting executing corou")
+            withContext(Dispatchers.IO) {
+                delay(1000)
+                log(caller, "$timeNow Finished executing corou")
+            }
+        }
+
+        scope.launch {
+            method(caller)
+            log(caller, "$timeNow main thread continues after coroutine finishes")
+        }
+    }
+
     private fun callbackTest(caller: CallerMethod = callerMethod) {
         // CALLBACKS
 /*      2019-08-24 13:47:48.171 16219-16219 W/System.err: callbacktest;, WAIT AND NOTIFY: WILL START; thread: main
@@ -125,7 +146,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         log(caller, "THREAD CONTINUES INSTANTLY")
     }
 
-    private fun doOnBackgroundAndNotifyListeners(caller: CallerMethod, onFinish: () -> Unit) {
+    private fun doOnBackgroundAndNotifyListeners(caller: CallerMethod = callerMethod, onFinish: () -> Unit) {
         log(caller, "WAIT AND NOTIFY - WILL START")
         Thread {
             log(caller, "WAIT AND NOTIFY - EXECUTING")
