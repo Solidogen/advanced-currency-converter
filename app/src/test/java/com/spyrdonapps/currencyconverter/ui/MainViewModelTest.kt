@@ -12,6 +12,7 @@ import com.spyrdonapps.currencyconverter.test.data.CurrenciesTestData
 import com.spyrdonapps.currencyconverter.test.util.InstantTaskExecutorRule
 import com.spyrdonapps.currencyconverter.util.state.Result
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
@@ -19,6 +20,7 @@ import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.instanceOf
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -91,6 +93,7 @@ class MainViewModelTest {
     fun mainViewModel_remoteDataAvailable_currenciesLiveDataHadSuccessStateWithCorrectData() {
         runBlockingTest {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
+            delay(1000)
         }
         argumentCaptor<Result<List<Currency>>>().run {
             verify(observer, times(2)).onChanged(capture())
@@ -99,18 +102,19 @@ class MainViewModelTest {
         }
     }
 
-    // TODO doesn't work now, TooLittleActualInvocations, some race conditions occur
+    // TODO doesn't work now, TOTALLY RANDOM error or success + probably some race conditions occur
     @Test
     fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
         runBlockingTest {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw IOException() }
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { emptyList<List<Currency>>() }
+            delay(1000)
         }
         argumentCaptor<Result<List<Currency>>>().run {
             verify(observer, times(2)).onChanged(capture())
 
             assertThat(lastValue, `is`(instanceOf(Result.Error::class.java)))
-            assertThat((lastValue as Result.Error<List<Currency>>).data, isNull())
+            assertEquals(null, (lastValue as Result.Error<List<Currency>>).data)
         }
     }
 
