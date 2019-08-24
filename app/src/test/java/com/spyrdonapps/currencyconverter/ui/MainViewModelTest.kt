@@ -1,7 +1,6 @@
 package com.spyrdonapps.currencyconverter.ui
 
 import com.nhaarman.mockitokotlin2.mock
-import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.data.repository.CurrencyRepository
 import com.spyrdonapps.currencyconverter.test.data.CurrenciesTestData
 import com.spyrdonapps.currencyconverter.test.data.TestExceptions.illegalArgumentException
@@ -55,8 +54,10 @@ class MainViewModelTest {
         testDispatcher.cleanupTestCoroutines()
     }
 
+
+
     @Test
-    fun `mainViewModel, remote data available, currenciesLiveData had success state with correct data`() {
+    fun `mainViewModel, remote data available, currenciesLiveData had loading and success state with correct data`() {
         runBlocking {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { CurrenciesTestData.currencies }
             classUnderTest.currenciesLiveData.captureValues {
@@ -67,7 +68,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `mainViewModel, remote data not available and cached data available, currenciesLiveData had error state with data from cache`() {
+    fun `mainViewModel, remote data error and cached data available, currenciesLiveData had loading and error state with data from cache`() {
         runBlocking {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { CurrenciesTestData.currencies }
@@ -79,13 +80,13 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `mainViewModel, remote data not available and cached data not available, currenciesLiveData had error state`() {
+    fun `mainViewModel, remote data error and cached data error, currenciesLiveData had loading and error state with no data`() {
         runBlocking {
             `when`(mockCurrencyRepository.getCurrenciesFromRemote()).thenAnswer { throw ioException }
             `when`(mockCurrencyRepository.getCurrenciesFromCache()).thenAnswer { throw illegalArgumentException }
             classUnderTest.currenciesLiveData.captureValues {
                 classUnderTest.initialize()
-                assertSendsValues(100, Result.Loading, Result.Error(illegalArgumentException))
+                assertSendsValues(100, Result.Loading, Result.Error(illegalArgumentException, null))
             }
         }
     }
