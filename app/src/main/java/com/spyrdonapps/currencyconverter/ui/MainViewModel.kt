@@ -34,34 +34,47 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     private val timeNow: String
         get() = SimpleDateFormat("hh:mm:ss:SSS", Locale.ROOT).format(Date())
 
-    data class CallerMethod(val name: String)
+    data class CallerMethod(val name: String, val codeLine: Int)
 
     private val callerMethod: CallerMethod
         get() {
-            return CallerMethod(Thread.currentThread().stackTrace
-                .map { it.methodName.toLowerCase(Locale.ROOT).removeSuffix("\$default") }.first { methodName ->
-                    !arrayOf("stacktrace", "callermethod", "invoke", "print").toList().any { methodName.contains(it) }
-                })
+            val stackTraceElement = Thread.currentThread().stackTrace
+                .first { stackTraceElement ->
+                    !arrayOf("stacktrace", "callermethod", "invoke", "print")
+                        .toList()
+                        .any {
+                            stackTraceElement.methodName.toLowerCase(Locale.ROOT).contains(it)
+                        }
+                }
+            return CallerMethod(stackTraceElement.methodName.removeSuffix("\$default"), stackTraceElement.lineNumber)
         }
 
     private fun log(callerMethod: CallerMethod, str: String) {
-        Timber.tag(callerMethod.name).e(str)
+        Timber.tag("${callerMethod.name} ${callerMethod.codeLine}").e(str)
     }
 
     init {
         loadData()
 
-//        launchOnMainTest()
-//        launchOnMainBlockingTest()
+        launchOnMainTest()
 
-//        withContextIoTest()
-//        withContextIoBlockingTest()
+        launchOnMainBlockingTest()
 
-        callSuspendingWithContextIoTest()
+        withContextIoTest()
+
+        scope.launch {
+            withContextIoSuspendTest()
+        }
+
+        withContextIoBlockingTest()
 
 //        callbackTest()
+        log(CallerMethod("init", 0), "$timeNow init method ends")
     }
 
+    /*
+    * Doesn't block calling function
+    * */
     private fun launchOnMainTest(caller: CallerMethod = callerMethod) {
         log(caller, "$timeNow starting executing corou")
         scope.launch {
@@ -72,11 +85,13 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
     }
 
     /*
+    * BLOCKS calling function
+    *
     * runBlocking is blocking coroutine scope, different than scope defined in viewmodel
     *
-    * scope.launch doesn't block thread, runBlocking does (?)
+    * scope.launch doesn't block thread, runBlocking does
     *
-    * this lets coroutine finish before
+    * RunBlocking is designed to be called from places where there are no coroutines yet, where we can block the thread
     * */
     private fun launchOnMainBlockingTest(caller: CallerMethod = callerMethod) {
         runBlocking {
@@ -86,11 +101,11 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
                 log(caller, "$timeNow Finished executing corou")
             }
         }
-        log(caller, "$timeNow main thread continues after coroutine finishes")
+        log(caller, "$timeNow main thread continues after runBlocking coroutine finishes")
     }
 
     /*
-    * thread continues instantly (I would think that is "blocks" but it's not a suspending function, see 'callSuspendingWithContextIoTest')
+    * Launch doesn't block calling function, but withContext blocks scope where is was launched
     * */
     private fun withContextIoTest(caller: CallerMethod = callerMethod) {
         scope.launch {
@@ -99,10 +114,31 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
                 delay(1000)
                 log(caller, "$timeNow Finished executing corou")
             }
+            log(caller, "$timeNow coroutine finishes, back to scope where withContext was called")
         }
-        log(caller, "$timeNow main thread continues instantly")
+        log(caller, "$timeNow main thread continues instantly after launch")
     }
 
+    /*
+    * Launch doesn't block calling function, but withContext blocks scope where is was launched
+    *
+    * No difference from withContextIoTest, withContext just forces caller to be a CoroutineScope
+    * */
+    private suspend fun withContextIoSuspendTest(caller: CallerMethod = callerMethod) {
+        scope.launch {
+            log(caller, "$timeNow starting executing corou")
+            withContext(Dispatchers.IO) {
+                delay(1000)
+                log(caller, "$timeNow Finished executing corou")
+            }
+            log(caller, "$timeNow coroutine finishes, back to scope where withContext was called")
+        }
+        log(caller, "$timeNow main thread continues instantly after launch")
+    }
+
+    /*
+    * BLOCKS calling function
+    * */
     private fun withContextIoBlockingTest(caller: CallerMethod = callerMethod) {
         runBlocking {
             log(caller, "$timeNow starting executing corou")
@@ -111,26 +147,7 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
                 log(caller, "$timeNow Finished executing corou")
             }
         }
-        log(caller, "$timeNow main thread continues after coroutine finishes")
-    }
-
-    /*
-    * thread is actually blocked because of 'suspend' keywork, otherwise it is the same as 'withContextIoTest'
-    * */
-    private fun callSuspendingWithContextIoTest(caller: CallerMethod = callerMethod) {
-
-        suspend fun method(caller: CallerMethod) {
-            log(caller, "$timeNow starting executing corou")
-            withContext(Dispatchers.IO) {
-                delay(1000)
-                log(caller, "$timeNow Finished executing corou")
-            }
-        }
-
-        scope.launch {
-            method(caller)
-            log(caller, "$timeNow main thread continues after coroutine finishes")
-        }
+        log(caller, "$timeNow main thread continues after runBlocking coroutine finishes")
     }
 
     private fun callbackTest(caller: CallerMethod = callerMethod) {
