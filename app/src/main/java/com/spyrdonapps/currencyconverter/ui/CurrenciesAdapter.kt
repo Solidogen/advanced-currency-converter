@@ -160,6 +160,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         fun updateDisplayedCurrency(currency: Currency) {
             view.rateEditText.apply {
                 tag = "text_is_now_edited_programatically_and_addTextChangedListener_can_check_this"
+                currency.setDisplayableValueBasedOnFirstCurrency(currencies)
                 if (currency.canChangeDisplayedRate) {
                     setText(currency.getFormattedDisplayableRateBasedOnEuro())
                 } else {
