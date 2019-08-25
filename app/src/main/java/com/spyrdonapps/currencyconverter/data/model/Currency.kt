@@ -34,7 +34,8 @@ data class Currency(
     @Ignore
     private var displayableValue = rateBasedOnEuro
 
-    fun setDisplayableValueBasedOnFirstCurrency(firstCurrency: Currency) {
+    fun setDisplayableValueBasedOnFirstCurrency(currencies: List<Currency>) {
+        val firstCurrency = currencies.first()
         displayableValue = rateBasedOnEuro * firstCurrency.enteredValue / firstCurrency.rateBasedOnEuro
     }
 

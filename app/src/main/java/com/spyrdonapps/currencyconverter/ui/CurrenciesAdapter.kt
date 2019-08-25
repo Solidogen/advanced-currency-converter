@@ -25,9 +25,6 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     private var currencies: MutableList<Currency> = mutableListOf()
     private var canUpdateList = true
 
-    private val firstCurrency
-        get() = currencies.first()
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
 
@@ -56,7 +53,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     ?.let {
                         it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
                         if (it.canChangeDisplayedRate) {
-                            it.setDisplayableValueBasedOnFirstCurrency(firstCurrency)
+                            it.setDisplayableValueBasedOnFirstCurrency(currencies)
                         }
                     }
                 // TODO check if I can spare this item changed callback and just change edittext value without redrawing
