@@ -5,6 +5,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -12,50 +13,40 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ActivityTestRule
 import com.spyrdonapps.currencyconverter.R
+import com.spyrdonapps.currencyconverter.test.util.withViewAtPosition
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.allOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.matcher.BoundedMatcher
-import android.view.View
-import com.spyrdonapps.currencyconverter.test.util.withViewAtPosition
-import org.hamcrest.CoreMatchers.allOf
-import org.hamcrest.Description
-import org.hamcrest.Matcher
 
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
-
-    // TODO make at least 2 reasonable tests
 
     @get:Rule
     var activityTestRule = ActivityTestRule<MainActivity>(MainActivity::class.java)
 
     @Before
     fun setup() {
-        Thread.sleep(3000)
+        Thread.sleep(1000)
     }
 
-    // https://github.com/WasimMemon/Myapplications/blob/master/Tutorials/app/src/androidTest/java/com/androprogrammer/tutorials/ListActivityUITestCases.java?source=post_page-----eb2ceaddc74f----------------------
-
-    @Test
-    fun mainActivity_dataIsLoaded_euroCurrencyIsVisible() {
-        onView(withText("EUR")).check(matches(isDisplayed()))
-    }
-
-//     tests: wait for data, click second view, first view has it's content
     @Test
     fun mainActivity_dataIsLoaded_recyclerHasItems() {
-        onRecycler().check(matches(withViewAtPosition(0, allOf(withId(R.id.isoCodeTextView), isDisplayed()))))
+        Thread.sleep(3000) // extra sleep first time, later items show almost instantly
+        (1..5).forEach { position ->
+            onRecycler().check(matches(withViewAtPosition(position, allOf(isDisplayed(), hasDescendant(withId(R.id.isoCodeTextView))))))
+        }
     }
 
     @Test
     fun mainActivity_dataIsLoaded_firstCurrencyIsEuro() {
-        onRecycler().check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)))
+        onRecycler().check(matches(withViewAtPosition(0, allOf(isDisplayed(), hasDescendant(withText(CurrenciesAdapter.EURO_ISO_CODE))))))
     }
+
+    //     tests: wait for data, click second view, first view has it's content
 
     private fun onRecycler() = onView(withId(R.id.recyclerView)).inRoot(withDecorView(`is`(activityTestRule.activity.window.decorView)))
 }

@@ -25,6 +25,7 @@ class CurrencyDaoTest {
     // region helper fields
 
     private lateinit var inMemoryDatabase: CurrencyDatabase
+
     private val testData = listOf(
         Currency("EUR", 1.0),
         Currency("AUD", 4.20)
