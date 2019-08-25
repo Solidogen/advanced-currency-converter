@@ -16,6 +16,10 @@ class AppCurrencyRepository(private val currencyService: CurrencyService, privat
     }
 
     override suspend fun getCurrenciesFromCache(): List<Currency> {
-        return currencyDao.getCurrencies()
+        val cachedCurrencies = currencyDao.getCurrencies()
+        if (cachedCurrencies.isEmpty()) {
+            throw IllegalArgumentException("No available currencies")
+        }
+        return cachedCurrencies
     }
 }

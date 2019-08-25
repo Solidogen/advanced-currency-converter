@@ -2,29 +2,25 @@ package com.spyrdonapps.currencyconverter.ui
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.data.repository.CurrencyRepository
+import com.spyrdonapps.currencyconverter.ui.base.BaseViewModel
 import com.spyrdonapps.currencyconverter.util.CoroutineManager
 import com.spyrdonapps.currencyconverter.util.extensions.interval
 import com.spyrdonapps.currencyconverter.util.state.Result
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(private val currencyRepository: CurrencyRepository) : ViewModel() {
-
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(job + Dispatchers.Main)
+class MainViewModel @Inject constructor(private val currencyRepository: CurrencyRepository) : BaseViewModel() {
 
     private val _currenciesLiveData: MutableLiveData<Result<List<Currency>>> = MutableLiveData()
     val currenciesLiveData: LiveData<Result<List<Currency>>> = _currenciesLiveData
 
-    init {
+    override fun initialize() {
+        super.initialize()
         loadData()
 
         /*
@@ -56,19 +52,15 @@ class MainViewModel @Inject constructor(private val currencyRepository: Currency
         }
     }
 
-    private suspend fun launchLoadDataFromCache(e: Exception) {
+    private suspend fun launchLoadDataFromCache(loadFromRemoteException: Exception) {
         try {
             currencyRepository.getCurrenciesFromCache().let { cachedCurrencies ->
-                _currenciesLiveData.postValue(Result.Error(e, cachedCurrencies.takeUnless { it.isEmpty() }))
+                _currenciesLiveData.postValue(Result.Error(loadFromRemoteException, cachedCurrencies))
             }
         } catch (e: Exception) {
             Timber.e(e)
             _currenciesLiveData.postValue(Result.Error(e))
         }
-    }
-
-    override fun onCleared() {
-        job.cancel()
     }
 
     companion object {

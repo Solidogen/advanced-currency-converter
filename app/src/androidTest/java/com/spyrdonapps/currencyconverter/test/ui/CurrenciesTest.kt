@@ -17,12 +17,6 @@ import com.spyrdonapps.currencyconverter.ui.MainActivity
 import org.junit.Rule
 
 
-
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
 class CurrenciesTest {
 
@@ -39,4 +33,10 @@ class CurrenciesTest {
     fun isActionBarDisplayed() {
         onView(withText("Rates")).check(matches(isDisplayed()))
     }
+
+    // TODO idling resource
+
+    // tests: wait for data, click second view, first view has it's content
+    // tests: wait for data, click second view, first view has it's content
+
 }
