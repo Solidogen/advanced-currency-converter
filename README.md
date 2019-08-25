@@ -1,4 +1,4 @@
-# Advanced Currency Converter
+# Advanced Currency Converter [![Build Status](https://travis-ci.org/Solidogen/advanced-currency-converter.svg?branch=master)](https://travis-ci.org/Solidogen/advanced-currency-converter)
 Android app for showing updated currency rates every second and recalculate all rates based on user input in any currency
 
 ### Tech stack
