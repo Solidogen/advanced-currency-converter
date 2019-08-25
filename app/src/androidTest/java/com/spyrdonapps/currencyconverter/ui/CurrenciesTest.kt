@@ -28,6 +28,8 @@ import org.hamcrest.Matcher
 @RunWith(AndroidJUnit4::class)
 class CurrenciesTest {
 
+    // TODO make at least 2 reasonable tests
+
     @get:Rule
     var activityTestRule = ActivityTestRule<MainActivity>(MainActivity::class.java)
 

@@ -7,8 +7,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.spyrdonapps.currencyconverter.data.model.Currency
 
-// TODO check how to test room db and try it
-
 @Dao
 abstract class CurrencyDao {
 
