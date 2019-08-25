@@ -7,31 +7,77 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.resume
 
 class CoroutineManager(private val scope: CoroutineScope) {
 
     // TODO try async await as well
 
     init {
-        launchOnMainTest()
-
-        launchOnMainBlockingTest()
-
-        withContextIoTest()
-
-        scope.launch {
-            withContextIoSuspendTest()
-        }
-
-        withContextIoBlockingTest()
+//        launchOnMainTest()
+//
+//        launchOnMainBlockingTest()
+//
+//        withContextIoTest()
+//
+//        scope.launch {
+//            withContextIoSuspendTest()
+//        }
+//
+//        withContextIoBlockingTest()
 
 //        callbackTest()
+
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                suspendCallbackTest()
+                log(callerMethod, "I WAS BLOCKED HERE IN NEXT LINE WHILE WAITING FOR SUSPEND callbackTest FUN TO FINISH")
+            }
+        }
+
         log(CallerMethod("init", 0), "$timeNow init method ends")
+    }
+
+    private fun callbackTest(caller: CallerMethod = callerMethod) {
+        doOnBackgroundAndNotifyListeners(caller, onFinish = {
+            log(callerMethod, "WAIT AND NOTIFY - FINISHED CALLBACK")
+        })
+        log(caller, "THREAD CONTINUES INSTANTLY")
+    }
+
+    /*
+    * suspend cancellable coroutine uses cancellable continuation to resume coroutine in any moment
+    *
+    * this lets us convert callback api to coroutines
+    * */
+    private suspend fun suspendCallbackTest(caller: CallerMethod = callerMethod) {
+        suspendCancellableCoroutine<Unit> { continuation ->
+            doOnBackgroundAndNotifyListeners {
+                log(caller, "WAIT AND NOTIFY - FINISHED CALLBACK")
+                continuation.resume(Unit)
+            }
+            log(caller, "THREAD CONTINUES INSTANTLY")
+        }
+    }
+
+    /*
+    * typical callback api, we can convert it to a coroutine
+    * */
+    private fun doOnBackgroundAndNotifyListeners(caller: CallerMethod = callerMethod, onFinish: () -> Unit) {
+        log(caller, "WAIT AND NOTIFY - WILL START")
+        Thread {
+            log(caller, "WAIT AND NOTIFY - EXECUTING")
+            Thread.sleep(2000)
+            Handler(Looper.getMainLooper()).post {
+                onFinish()
+            }
+        }.start()
     }
 
     /*
@@ -107,31 +153,6 @@ class CoroutineManager(private val scope: CoroutineScope) {
             log(caller, "$timeNow withContext coroutine finishes, back to scope where withContext was called")
         }
         log(caller, "$timeNow main thread continues after runBlocking coroutine finishes")
-    }
-
-
-    private fun callbackTest(caller: CallerMethod = callerMethod) {
-        // CALLBACKS
-/*      2019-08-24 13:47:48.171 16219-16219 W/System.err: callbacktest;, WAIT AND NOTIFY: WILL START; thread: main
-        2019-08-24 13:47:48.172 16219-16219 W/System.err: callbacktest;, THREAD CONTINUES; thread: main
-        2019-08-24 13:47:48.172 16219-16258 W/System.err: callbacktest;, WAIT AND NOTIFY: EXECUTING; thread: Thread-7
-        2019-08-24 13:47:50.174 16219-16219 W/System.err: callbacktest;, WAIT AND NOTIFY: FINISHED; thread: main*/
-
-        doOnBackgroundAndNotifyListeners(caller, onFinish = {
-            log(caller, "WAIT AND NOTIFY - FINISHED CALLBACK")
-        })
-        log(caller, "THREAD CONTINUES INSTANTLY")
-    }
-
-    private fun doOnBackgroundAndNotifyListeners(caller: CallerMethod = callerMethod, onFinish: () -> Unit) {
-        log(caller, "WAIT AND NOTIFY - WILL START")
-        Thread {
-            log(caller, "WAIT AND NOTIFY - EXECUTING")
-            Thread.sleep(2000)
-            Handler(Looper.getMainLooper()).post {
-                onFinish()
-            }
-        }.start()
     }
 }
 
