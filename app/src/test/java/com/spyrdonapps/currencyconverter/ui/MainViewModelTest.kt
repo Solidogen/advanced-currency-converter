@@ -54,8 +54,6 @@ class MainViewModelTest {
         testDispatcher.cleanupTestCoroutines()
     }
 
-
-
     @Test
     fun `mainViewModel, remote data available, currenciesLiveData had loading and success state with correct data`() {
         runBlocking {

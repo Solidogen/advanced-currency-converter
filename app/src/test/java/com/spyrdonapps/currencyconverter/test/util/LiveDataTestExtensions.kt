@@ -88,19 +88,3 @@ fun <T> LiveData<T>.getValueForTest(): T? {
     removeObserver(observer)
     return value
 }
-
-/*
-* Taken from coroutine codelab
-* */
-// helper method to allow us to get the value from a LiveData
-// LiveData won't publish a result until there is at least one observer
-fun <T> LiveData<T>.observeForTesting(
-    block: () -> Unit) {
-    val observer = Observer<T> { Unit }
-    try {
-        observeForever(observer)
-        block()
-    } finally {
-        removeObserver(observer)
-    }
-}
