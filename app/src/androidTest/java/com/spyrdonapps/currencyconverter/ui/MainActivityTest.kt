@@ -20,13 +20,14 @@ import org.junit.runner.RunWith
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.matcher.BoundedMatcher
 import android.view.View
+import com.spyrdonapps.currencyconverter.test.util.withViewAtPosition
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 
 
 @RunWith(AndroidJUnit4::class)
-class CurrenciesTest {
+class MainActivityTest {
 
     // TODO make at least 2 reasonable tests
 
@@ -57,17 +58,4 @@ class CurrenciesTest {
     }
 
     private fun onRecycler() = onView(withId(R.id.recyclerView)).inRoot(withDecorView(`is`(activityTestRule.activity.window.decorView)))
-
-    private fun withViewAtPosition(position: Int, itemMatcher: Matcher<View>): Matcher<View> {
-        return object : BoundedMatcher<View, RecyclerView>(RecyclerView::class.java) {
-            override fun describeTo(description: Description) {
-                itemMatcher.describeTo(description)
-            }
-
-            override fun matchesSafely(recyclerView: RecyclerView): Boolean {
-                val viewHolder = recyclerView.findViewHolderForAdapterPosition(position)
-                return viewHolder != null && itemMatcher.matches(viewHolder.itemView)
-            }
-        }
-    }
 }
