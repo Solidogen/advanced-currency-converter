@@ -19,7 +19,7 @@ import java.util.Collections
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
-    // TODO scrolling after putting value from keyboard makes unexpected behaviors, unit test it
+    // TODO scrolling after putting value from keyboard makes unexpected behaviors
 
     private lateinit var recyclerView: RecyclerView
     private var currencies: MutableList<Currency> = mutableListOf()
@@ -28,16 +28,17 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_currency, parent, false))
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(currencies[position])
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {}
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (shouldRebindWholeViewHolder(payloads)) {
+            holder.bind(currencies[position])
+        } else {
+            holder.updateDisplayedCurrency(currencies[position])
+        }
     }
 
     override fun getItemCount() = currencies.count()
-
-    override fun onAttachedToRecyclerView(recycler: RecyclerView) {
-        super.onAttachedToRecyclerView(recycler)
-        recyclerView = recycler
-    }
 
     fun setData(updatedCurrencies: List<Currency>) {
         if (!canUpdateList || updatedCurrencies.isEmpty()) {
@@ -47,21 +48,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             currencies = Collections.synchronizedList(updatedCurrencies)
             notifyDataSetChanged()
         } else {
-            updatedCurrencies.forEach { updatedCurrency ->
-                currencies
-                    .firstOrNull { it.isoCode == updatedCurrency.isoCode }
-                    ?.let {
-                        it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
-                        if (it.canChangeDisplayedRate) {
-                            it.setDisplayableValueBasedOnFirstCurrency(currencies)
-                        }
-                    }
-                // TODO check if I can spare this item changed callback and just change edittext value without redrawing
-                currencies.filter { it.canChangeDisplayedRate }
-                    .forEach {
-                        notifyItemChanged(currencies.indexOf(it))
-                    }
-            }
+            updateDisplayedCurrenciesFromRemoteDataUpdate(updatedCurrencies)
         }
     }
 
@@ -97,6 +84,41 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         return currencies.first { it.isoCode == currency.isoCode }.getFormattedDisplayableRateBasedOnEuro()
     }
 
+    private fun updateDisplayedCurrenciesFromRemoteDataUpdate(updatedCurrencies: List<Currency>) {
+        updatedCurrencies.forEach { updatedCurrency ->
+            currencies
+                .firstOrNull { it.isoCode == updatedCurrency.isoCode }
+                ?.let {
+                    it.rateBasedOnEuro = updatedCurrency.rateBasedOnEuro
+                    if (it.canChangeDisplayedRate) {
+                        it.setDisplayableValueBasedOnFirstCurrency(currencies)
+                    }
+                }
+        }
+        currencies.filter { it.canChangeDisplayedRate }
+            .forEach {
+                notifyItemChanged(currencies.indexOf(it), Unit)
+            }
+    }
+
+    private fun updateDisplayedCurrenciesFromUserInput() {
+        currencies.filter { it.canChangeDisplayedRate }
+            .forEach {
+                it.setDisplayableValueBasedOnFirstCurrency(currencies)
+                notifyItemChanged(currencies.indexOf(it), Unit)
+            }
+    }
+
+    /*
+    * If a payload is added to notifyItemChanged, we want to preserve ViewHolder and just update currency
+    * */
+    private fun shouldRebindWholeViewHolder(payloads: MutableList<Any>) = payloads.isEmpty()
+
+    override fun onAttachedToRecyclerView(recycler: RecyclerView) {
+        super.onAttachedToRecyclerView(recycler)
+        recyclerView = recycler
+    }
+
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         fun bind(currency: Currency) {
@@ -114,21 +136,36 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
                     .circleCrop()
                     .into(flagImageView)
 
+                updateDisplayedCurrency(currency)
+
                 rateEditText.apply {
-                    if (currency.canChangeDisplayedRate) {
-                        setText(currency.getFormattedDisplayableRateBasedOnEuro())
-                    } else {
-                        setText(getCachedFormattedRateForCurrency(currency))
-                    }
                     setOnTouchListener { _, _ ->
                         view.performClick()
                         true
                     }
                     addTextChangedListener { newText ->
-                        currency.enteredValue = newText.toDoubleOrNull() ?: 0.0
-                        // todo try to instantly update rates without destroying everything
+                        /*
+                        * Tag is temporarily set to some value when updating text programatically,
+                        * so this listener can handle only user input with if-check
+                        * */
+                        if (tag == null) {
+                            currency.enteredValue = newText.toDoubleOrNull() ?: 0.0
+                            updateDisplayedCurrenciesFromUserInput()
+                        }
                     }
                 }
+            }
+        }
+
+        fun updateDisplayedCurrency(currency: Currency) {
+            view.rateEditText.apply {
+                tag = "text_is_now_edited_programatically_and_addTextChangedListener_can_check_this"
+                if (currency.canChangeDisplayedRate) {
+                    setText(currency.getFormattedDisplayableRateBasedOnEuro())
+                } else {
+                    setText(getCachedFormattedRateForCurrency(currency))
+                }
+                tag = null
             }
         }
 

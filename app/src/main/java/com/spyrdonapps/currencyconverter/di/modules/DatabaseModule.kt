@@ -19,7 +19,7 @@ abstract class DatabaseModule {
         @Provides
         @ApplicationScope
         fun database(@ApplicationContext context: Context): CurrencyDatabase =
-            Room.databaseBuilder(context, CurrencyDatabase::class.java, "app-database")
+            Room.databaseBuilder(context, CurrencyDatabase::class.java, CurrencyDatabase.DATABASE_NAME)
                 .fallbackToDestructiveMigration()
                 .build()
 

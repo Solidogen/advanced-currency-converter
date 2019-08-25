@@ -10,4 +10,8 @@ import com.spyrdonapps.currencyconverter.data.model.Currency
 abstract class CurrencyDatabase : RoomDatabase() {
 
     abstract fun currencyDao(): CurrencyDao
+
+    companion object {
+        const val DATABASE_NAME = "app-database"
+    }
 }

@@ -4,8 +4,9 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.SimpleItemAnimator
+import androidx.recyclerview.widget.RecyclerView
 import com.spyrdonapps.currencyconverter.R
 import com.spyrdonapps.currencyconverter.data.model.Currency
 import com.spyrdonapps.currencyconverter.ui.base.BaseActivity
@@ -56,7 +57,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = currenciesAdapter
-            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+            itemAnimator = createItemAnimator()
         }
     }
 
@@ -101,6 +102,14 @@ class MainActivity : BaseActivity<MainViewModel>() {
             LAYOUT_MANAGER_INSTANCE_STATE_TAG,
             recyclerView.layoutManager?.onSaveInstanceState()
         )
+    }
+
+    private fun createItemAnimator() = object : DefaultItemAnimator() {
+        override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder, payloads: MutableList<Any>): Boolean {
+            return true
+        }
+    }.apply {
+        supportsChangeAnimations = false
     }
 
     companion object {
