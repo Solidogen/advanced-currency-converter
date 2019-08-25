@@ -77,6 +77,7 @@ class AppCurrencyRepositoryTest {
             `when`(mockCurrencyService.getCurrenciesResponse()).thenAnswer { throw ioException }
             classUnderTest.getCurrenciesFromRemote()
         }
+        // expected exception defined in @Test parameter
     }
 
     @Test
@@ -94,6 +95,7 @@ class AppCurrencyRepositoryTest {
             `when`(mockCurrencyDao.getCurrencies()).thenAnswer { emptyList<Currency>() }
             classUnderTest.getCurrenciesFromCache()
         }
+        // expected exception defined in @Test parameter
     }
 
     @Test(expected = Exception::class)
@@ -102,6 +104,7 @@ class AppCurrencyRepositoryTest {
             `when`(mockCurrencyDao.getCurrencies()).thenAnswer { throw Exception() }
             classUnderTest.getCurrenciesFromCache()
         }
+        // expected exception defined in @Test parameter
     }
 
     // region helper methods
