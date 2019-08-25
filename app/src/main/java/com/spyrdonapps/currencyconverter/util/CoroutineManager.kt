@@ -10,10 +10,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.lang.Exception
+import java.lang.RuntimeException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class CoroutineManager(private val scope: CoroutineScope) {
 
@@ -35,9 +38,13 @@ class CoroutineManager(private val scope: CoroutineScope) {
 //        callbackTest()
 
         scope.launch {
-            withContext(Dispatchers.IO) {
-                suspendCallbackTest()
-                log(callerMethod, "I WAS BLOCKED HERE IN NEXT LINE WHILE WAITING FOR SUSPEND callbackTest FUN TO FINISH")
+            try {
+                withContext(Dispatchers.IO) {
+                    suspendCallbackTest()
+                    log(callerMethod, "I WAS BLOCKED HERE IN NEXT LINE WHILE WAITING FOR SUSPEND callbackTest FUN TO FINISH")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
@@ -55,12 +62,18 @@ class CoroutineManager(private val scope: CoroutineScope) {
     * suspend cancellable coroutine uses cancellable continuation to resume coroutine in any moment
     *
     * this lets us convert callback api to coroutines
+    *
+    * I can resume with data or resume with exception
     * */
     private suspend fun suspendCallbackTest(caller: CallerMethod = callerMethod) {
         suspendCancellableCoroutine<Unit> { continuation ->
             doOnBackgroundAndNotifyListeners {
-                log(caller, "WAIT AND NOTIFY - FINISHED CALLBACK")
-                continuation.resume(Unit)
+                try {
+                    log(caller, "WAIT AND NOTIFY - FINISHED CALLBACK")
+                    continuation.resume(Unit)
+                } catch (e: Exception) {
+                    continuation.resumeWithException(e)
+                }
             }
             log(caller, "THREAD CONTINUES INSTANTLY")
         }
