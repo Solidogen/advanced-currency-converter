@@ -167,6 +167,29 @@ class CoroutineManager(private val scope: CoroutineScope) {
         }
         log(caller, "$timeNow main thread continues after runBlocking coroutine finishes")
     }
+
+    // SUSPEND LAMBDAS
+
+    lateinit var suspendLambda: suspend () -> Unit
+
+    fun runSuspendMethod(block: suspend () -> Unit) {
+        Timber.d("do something")
+        runBlocking {
+            launch {
+                block() // fire and forget
+            }
+            withContext(Dispatchers.IO) {
+                block() // fire and block thread
+            }
+            launch {
+                withContext(Dispatchers.IO) {
+                    block() // fire and forget but wait for suspend block to complete before executing rest of launch lambda
+                }
+                Timber.d("do rest of launch")
+            }
+        }
+        Timber.d("do something else")
+    }
 }
 
 private val timeNow: String
