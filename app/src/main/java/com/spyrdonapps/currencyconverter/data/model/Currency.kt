@@ -47,6 +47,10 @@ data class Currency(
         }
     }
 
+    fun persistDisplayableValue() {
+        enteredValue = displayableValue
+    }
+
     companion object {
 
         private fun isWholeNumber(number: Double) = number % 1.0 == 0.0

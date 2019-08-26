@@ -19,8 +19,6 @@ import java.util.Collections
 
 class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
-    // TODO scrolling after putting value from keyboard makes unexpected behaviors
-
     private lateinit var recyclerView: RecyclerView
     private var currencies: MutableList<Currency> = mutableListOf()
     private var canUpdateList = true
@@ -48,7 +46,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
             currencies = Collections.synchronizedList(updatedCurrencies)
             notifyDataSetChanged()
         } else {
-            updateDisplayedCurrenciesFromRemoteDataUpdate(updatedCurrencies)
+            updateDisplayedCurrenciesByList(updatedCurrencies)
         }
     }
 
@@ -78,13 +76,14 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         currencies.forEach {
             it.canChangeDisplayedRate = it.isoCode != currency.isoCode
         }
+        updateDisplayedCurrenciesByList(currencies)
     }
 
     private fun getCachedFormattedRateForCurrency(currency: Currency): String {
         return currencies.first { it.isoCode == currency.isoCode }.getFormattedDisplayableRateBasedOnEuro()
     }
 
-    private fun updateDisplayedCurrenciesFromRemoteDataUpdate(updatedCurrencies: List<Currency>) {
+    private fun updateDisplayedCurrenciesByList(updatedCurrencies: List<Currency>) {
         updatedCurrencies.forEach { updatedCurrency ->
             currencies
                 .firstOrNull { it.isoCode == updatedCurrency.isoCode }
@@ -105,6 +104,7 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
         currencies.filter { it.canChangeDisplayedRate }
             .forEach {
                 it.setDisplayableValueBasedOnFirstCurrency(currencies)
+                it.persistDisplayableValue()
                 notifyItemChanged(currencies.indexOf(it), Unit)
             }
     }
@@ -172,13 +172,13 @@ class CurrenciesAdapter : RecyclerView.Adapter<CurrenciesAdapter.ViewHolder>() {
 
         private fun onItemClicked(currency: Currency, position: Int, rateEditText: EditText) {
             Timber.d("Currency clicked: ${currency.isoCode}")
-            setCurrencyRateNotChangeable(currency)
             moveItemToTopAndNotify(currency, position)
             rateEditText.run {
                 requestFocus()
                 setSelection(text.length)
                 showKeyboard()
             }
+            setCurrencyRateNotChangeable(currency)
         }
     }
 
