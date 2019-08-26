@@ -48,7 +48,7 @@ class MainActivityTest {
 
     @Test
     fun mainActivity_dataIsLoaded_recyclerHasItems() {
-        (1..5).forEach { position ->
+        for (position in 1..5) {
             onRecycler().check(matches(withViewAtPosition(position, allOf(isDisplayed(), hasDescendant(withId(R.id.isoCodeTextView))))))
         }
     }
@@ -63,7 +63,7 @@ class MainActivityTest {
         val recyclerView = activityTestRule.activity.findViewById<RecyclerView>(R.id.recyclerView)
         repeat(10) {
             val position = Random.Default.nextInt(1, 6)
-            val clickedViewCurrencyIsoName = (recyclerView.findViewHolderForAdapterPosition(position) as CurrenciesAdapter.ViewHolder).itemView.isoCodeTextView.text.toString()
+            val clickedViewCurrencyIsoName = (recyclerView.findViewHolderForAdapterPosition(position) as? CurrenciesAdapter.ViewHolder)?.itemView?.isoCodeTextView?.text.toString()
 
             onRecycler().perform(RecyclerViewActions.actionOnItemAtPosition<CurrenciesAdapter.ViewHolder>(position, click()))
             onRecycler().check(matches(withViewAtPosition(0, allOf(isDisplayed(), hasDescendant(withText(clickedViewCurrencyIsoName))))))
