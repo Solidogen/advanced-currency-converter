@@ -5,13 +5,14 @@ Android app for showing updated currency rates every second and recalculate all 
 
 ### Tech stack
 * MVVM architecture
-* Coroutines & Channels for I/O & reactive streams
+* Coroutines & Flows for I/O & reactive streams
 * Retrofit & Room combined in repository pattern
 * LiveData
 * Dagger
 
-### Noticable things
-* Unit/UI tests
+### Noticable features
+* Unit tests - Mockito, JUnit
+* UI tests - Espresso
 * Offline mode
-* Rotation recycler state saving
 * Recycler item animations
+* Recycler position restored after orientation change
